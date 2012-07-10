@@ -30,17 +30,17 @@ trait ICreature extends IObject {
   /**
    * Makes this creature say the given text immediately.
    */
-  // def say(message: String)
+  def say(message: String)
   
   /**
    * Makes this creature whisper the given text immediately.
    */
-  // def whisper(message: String)
+  def whisper(message: String)
   
   /**
    * Will return true if this Creature can see the Creature other.
    */
-  // def sees(other: ICreature): Boolean
+  def sees(other: ICreature): Boolean
   
   /**
    * Returns all perceived Creatures nearby (heard, seen).
@@ -48,12 +48,12 @@ trait ICreature extends IObject {
    * 
    * Distance: the distance in meters. Limited to 0-30.
    */
-  //ICreature[] getPerceivedCreatures(float distance)
+  def getPerceivedCreatures(distance: Float): Array[ICreature]
   
   /**
    * Returns the location of this Creature. 
    */
-  //ILocation getLocation
+  def location: ILocation
   
   /*
    * Movement

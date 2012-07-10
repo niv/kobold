@@ -13,16 +13,8 @@ import org.mozilla.javascript.TimingContextFactory
 import es.elv.kobold.script._
 import es.elv.kobold.intf._
 
-class RhinoImpl extends Language[Function, RhinoContext] {
-  type Ctx = RhinoContext
-
-	val identifier = "js/rhino"
-
-
-	private val classShutter: SecureClassShutter =
-    new SecureClassShutter(wrapFactory)
-  classShutter.addAllowedStartsWith("es.elv.kobold.intf.")
-	classShutter.addAllowedStartsWith("es.elv.kobold.lang.rhino.")
+class RhinoImpl extends Language[Function,RhinoContext] {
+	val name = "js/rhino"
 
   private val cf: TimingContextFactory =
     new TimingContextFactory()
@@ -30,7 +22,8 @@ class RhinoImpl extends Language[Function, RhinoContext] {
   private val wrapFactory: DefaultSecureWrapFactory =
 		new DefaultSecureWrapFactory()
   wrapFactory.addAllowedNatives(
-      classOf[IObject], classOf[IUnknown], classOf[ICreature],
+      classOf[IBase], classOf[IObject], classOf[IUnknown],
+      classOf[ICreature],
       classOf[IArea], //Item.class, IModule.class, IPlaceable.class,
       classOf[IPersistency], classOf[ILocation],
       classOf[IVector2], classOf[IVector3],
@@ -38,8 +31,14 @@ class RhinoImpl extends Language[Function, RhinoContext] {
       //ISystem.class,
       classOf[IScriptEventRegistry[_]]
   )
+	
+  private val classShutter: SecureClassShutter =
+    new SecureClassShutter(wrapFactory)
+  classShutter.addAllowedStartsWith("es.elv.kobold.intf.")
+  classShutter.addAllowedStartsWith("es.elv.kobold.impl.intf.")
+	classShutter.addAllowedStartsWith("es.elv.kobold.lang.rhino.")
 
-	private def getContext(host: IObject, ctx: Ctx): JSCtx = {
+	private def getContext(host: IObject, ctx: RhinoContext): JSCtx = {
 		val jsctx = cf.enterContext(150)
 		jsctx.setWrapFactory(wrapFactory)
 		jsctx.setClassShutter(classShutter)
@@ -51,7 +50,7 @@ class RhinoImpl extends Language[Function, RhinoContext] {
     jsctx
 	}
 
-  def prepare(host: Host, source: String): Ctx = {
+  def prepare(host: Host, source: String): RhinoContext = {
 		val start = System.currentTimeMillis()
 		
 		try {
@@ -59,7 +58,7 @@ class RhinoImpl extends Language[Function, RhinoContext] {
 			val scope = SecureScriptRuntime.initSecureStandardObjects(ctx, null, true)
 			val s = ctx.compileString(source, "", 0, null)
 			
-			new Ctx(this, scope, s)
+			new RhinoContext(this, scope, s)
 		} finally {
 			JSCtx.exit()
 			
@@ -68,7 +67,7 @@ class RhinoImpl extends Language[Function, RhinoContext] {
 		}
   }
 
-  def execute(host: Host, obj: IObject, ctx: Ctx) = {		
+  def execute(host: Host, obj: IObject, ctx: RhinoContext) = {		
 		val start = System.currentTimeMillis()
 		
 		try {
@@ -89,7 +88,7 @@ class RhinoImpl extends Language[Function, RhinoContext] {
 	}
 
 
-  def executeEventHandler(host: Host, obj: IObject, ctx: Ctx,
+  def executeEventHandler(host: Host, obj: IObject, ctx: RhinoContext,
       eh: EventHandler[Function], va: List[Object]) = {
 
     val start = System.currentTimeMillis()

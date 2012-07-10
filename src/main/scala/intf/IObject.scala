@@ -1,23 +1,7 @@
 package es.elv.kobold.intf
 
-/**
- * The base game object, from which others inherit functionality
- * common to all objects.
- */
-trait IObject /*extends IPersistency*/ {
-	/**
-	 * Write something to the script log.
-	 */
-	//def log(Object... message)
-
-
-	/**
-	 * Send a custom IPC message to another object.
-	 * The target object will receive the "script.ipc" event.
-	 */
-	def ipc(target: IObject, message: Object)
-
-	/**
+trait IBase {
+  /**
 	 * Returns the internal object id. Useful for debugging.
 	 * Will change between server restarts.
 	 */
@@ -30,6 +14,25 @@ trait IObject /*extends IPersistency*/ {
 	 */
   def isValid: Boolean
 	
+
+  /**
+	 * Write something to the script log.
+	 */
+  def log(message: String) {}
+}
+
+/**
+ * The base game object, from which others inherit functionality
+ * common to all objects.
+ */
+trait IObject extends IBase /*extends IPersistency*/ {
+	/**
+	 * Send a custom IPC message to another object.
+	 * The target object will receive the "script.ipc" event.
+	 */
+	def ipc(target: IObject, message: Object)
+
+
 	/**
 	 * Destroy this object, unmap it from the Script Host, and
 	 * remove all running script handlers. This is non-reversible.

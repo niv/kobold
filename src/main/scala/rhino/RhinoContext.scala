@@ -6,7 +6,12 @@ import org.mozilla.javascript.Scriptable
 
 import es.elv.kobold.script._
 
-class RhinoContext(val rhino: RhinoImpl, val scope: Scriptable, val compiled: Script)
-    extends Context[Function] {
-  override val language = rhino.identifier
+class RhinoContext(
+  val rhino: RhinoImpl, //Language[Function,Context[Function]],
+  val scope: Scriptable,
+  val compiled: Script
+) extends Context[Function] {
+  
+  override val language = rhino.
+    asInstanceOf[Language[Function,Context[Function]]]
 }

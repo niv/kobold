@@ -34,6 +34,18 @@ object EventHandler extends SchedulerListener with Logging {
       case E("creature_spawn", o: ICreature) =>
         e(o)("creature.spawn")
       
+      case E("creature_perc", o: ICreature) =>
+        val (heard, seen, inaudible, vanished, last) = (
+          NWScript.getLastPerceptionHeard, NWScript.getLastPerceptionSeen,
+          NWScript.getLastPerceptionInaudible, NWScript.getLastPerceptionVanished,
+          NWScript.getLastPerceived
+        )
+        require(List(heard, seen, inaudible, vanished).count(_ == true) == 1)
+        if (heard) e(o)("creature.hears", last)
+        else if (seen) e(o)("creature.sees", last)
+        else if (vanished) e(o)("creature.seesnot", last)
+        else if (inaudible) e(o)("creature.hearsnot", last)
+
       case E("creature_hb", o: ICreature) =>
         // Host.onCreatureHB(o) // for task manager!
 

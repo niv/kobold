@@ -16,6 +16,8 @@ object IVector2 {
     new IVector2 {
       val x = _x
       val y = _y
+
+      override def toString = "IVector2(%f,%f)".format(x,y)
     }
 }
 

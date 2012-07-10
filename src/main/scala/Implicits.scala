@@ -29,7 +29,7 @@ object Implicits {
     IVector3(l.getX, l.getY, l.getZ)
 
 	implicit def vec2nwvec(l: IVector3): NWVector =
-    new NWVector(l.getX, l.getY, l.getZ)
+    new NWVector(l.x, l.y, l.z)
 
 	implicit def ivec2vec(v: (Float, Float, Float)): IVector3 =
     IVector3(v._1, v._2, v._3)

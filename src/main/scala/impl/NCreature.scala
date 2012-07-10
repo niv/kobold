@@ -30,7 +30,7 @@ class NCreature(w: NWObject) extends NObject(w) with ICreature {
       IVector3.ORIGIN) map { G[T](_) } toList
 
   def getPerceivedCreatures(distance: Float) =
-    nearObjects[NCreature](1 /*OBJECT_TYPE_CREATURE*/, distance) toArray
+    nearObjects[NCreature](1 /*OBJECT_TYPE_CREATURE*/, distance) filter (sees(_)) toArray
 
   def location = NWScript.getLocation(this)
 }

@@ -6,7 +6,10 @@ package es.elv.kobold.api
 trait IObject extends IBase /*extends IPersistency*/ {
 	/**
 	 * Send a custom IPC message to another object.
-	 * The target object will receive the "script.ipc" event.
+	 * The target object will receive the "ipc" event.
+   * There are no guarantees that the message is delivered (or
+   * acted upon), since the event runs entirely asynchronously
+   * and may be delayed by the server as required.
 	 */
 	def ipc(target: IObject, message: Object)
 

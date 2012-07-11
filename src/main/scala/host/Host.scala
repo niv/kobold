@@ -7,11 +7,11 @@ import es.elv.kobold.api._
 import es.elv.kobold._
 import es.elv.kobold.game._
 
-import org.nwnx.nwnx2.jvm.{NWScript, NWObject, NWLocation, NWVector}
+import org.nwnx.nwnx2.jvm.{Scheduler, NWScript, NWObject, NWLocation, NWVector}
 import org.nwnx.nwnx2.jvm.constants.ObjectType
 
 /** The Host manages registered languages and distributes events
-  * to EventListeners. 
+  * to EventListeners.
   */
 trait Host extends HostEvents {
   /** Handle the given event in all registered Contexts. */
@@ -20,12 +20,20 @@ trait Host extends HostEvents {
 
   /** Attaches the given context to the given host objects. */
   def attachContext[EH](ctx: Context[EH], hosts: Set[IObject])
-  
+
   /** Detaches the given Context from the given host objects. */
   def detachContext[EH](ctx: Context[EH], hosts: Set[IObject])
 
   /** Detaches the given context from all host objects. */
   def detachContextFromAll[EH](ctx: Context[EH])
+
+  /** Returns the current objectSelf, or None if no script is running. */
+  def currentObjectSelf: Option[IBase]
+
+  /** Sends a inter-object message.
+    * Returns true if the message was delivered successfully.
+    */
+  def ipc(source: IObject, target: IObject, message: Object): Boolean
 }
 
 object Host extends Host with Logging {
@@ -66,22 +74,37 @@ object Host extends Host with Logging {
     }
   }
 
+  private var _currentObjectSelf: Option[IBase] = None
+  def currentObjectSelf = _currentObjectSelf
+
   def handleObjectEvent(objSelf: IObject, eventClass: String,
       va: List[Object]) {
-    
-    attachedTo(objSelf) foreach { ctx =>
-      try {
-        ctx.executeEventHandler(this, objSelf, eventClass, convertToAPI(va))
-      } catch {
-        case x: org.mozilla.javascript.EcmaError =>
-          log.error(x, "in " + eventClass + " of " + ctx)
-          detachContextFromAll(ctx)
 
-        case any => throw any
+    try {
+      _currentObjectSelf = Some(objSelf)
+
+      attachedTo(objSelf) foreach { ctx =>
+        try {
+          ctx.executeEventHandler(this, objSelf, eventClass, convertToAPI(va))
+        } catch {
+          case x: org.mozilla.javascript.EcmaError =>
+            log.error(x, "in " + eventClass + " of " + ctx)
+            detachContextFromAll(ctx)
+
+          case any => throw any
+        }
       }
+    } finally {
+      _currentObjectSelf = None
     }
   }
-  
+
+  def ipc(source: IObject, target: IObject, message: Object) = {
+    require(currentObjectSelf.isEmpty)
+    handleObjectEvent(target, "ipc", List(source, message))
+    true
+  }
+
   //override def onCreatureHB(c: ICreature) =
   //  attachedTo(c) foreach {
   //    _.eventHandlerFor("creature.hb")

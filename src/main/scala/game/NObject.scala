@@ -2,8 +2,11 @@ package es.elv.kobold.game
 
 import org.nwnx.nwnx2.jvm.{NWObject, NWScript, Scheduler}
 import es.elv.kobold.api.{IBase, IObject}
+import es.elv.kobold.host.Host
 import com.codahale.logula.Log
 import es.elv.kobold.G
+
+class NoAccessException extends RuntimeException
 
 class NObject(wrapped: NWObject) extends G(wrapped) with IObject with ActionQueue {
   protected implicit def n2nw(n: NObject): NWObject =
@@ -16,12 +19,26 @@ class NObject(wrapped: NWObject) extends G(wrapped) with IObject with ActionQueu
   override def log(message: String) =
     _log.debug(message)
 
-  def ipc(target: IObject, message: Object) =
-    null // HostImpl.ipc(
+  def ipc(target: IObject, message: Object) = <= {
+      log("sending ipc to " + target + ": " + message)
+      Host.ipc(this, target, message)
+    }
 
-  def name = NWScript.getName(this, false)
+  def mayAccess = Host.currentObjectSelf match {
+    case Some(o) => o.objectId == this.objectId
+    case None => false
+  }
 
-  def destroy = NWScript.destroyObject(this, 1f)
+  protected def checkAccess: Unit = if (!mayAccess)
+    throw new NoAccessException
 
-  def mayAccess = false
+  def name = {
+    checkAccess
+    NWScript.getName(this, false)
+  }
+
+  def destroy {
+    checkAccess
+    NWScript.destroyObject(this, 1f)
+  }
 }

@@ -3,21 +3,14 @@ package es.elv.kobold.glue
 import org.nwnx.nwnx2.jvm._
 
 import es.elv.kobold.{G, GCoreClasses}
-import es.elv.kobold.impl.script.Host
-import es.elv.kobold.impl.api._
+import es.elv.kobold.host._
+import es.elv.kobold.game._
 import es.elv.kobold.api._
-import es.elv.kobold.script._
 
 import com.codahale.logula.Logging
 import org.apache.log4j.Level
 
-object ObjectHandler extends NWObject.ObjectHandler with Logging {
-  def handleObjectClass(obj: NWObject, valid: Boolean, objType: Int,
-        resRef: String, tag: String): NWObject =
-    G(obj)
-}
-
-object EventHandler extends SchedulerListener with Logging {
+private [glue] object EventHandler extends SchedulerListener with Logging {
   def postFlushQueues(remainingTokens: Int) {}
   def missedToken(objSelf: NWObject, token: String) {}
   def context(objSelf: NWObject) {}
@@ -49,13 +42,6 @@ object EventHandler extends SchedulerListener with Logging {
       case E("creature_hb", o: ICreature) =>
         // Host.onCreatureHB(o) // for task manager!
 
-      /*
-      case E("mod_load", o: IModule) =>
-        e(o)("module.load")
-      case E("mod_hb", o: IModule) =>
-        e(o)("module.hb")
-      */
-
       case e =>
         log.debug("unhandled: " + e)
     }
@@ -84,10 +70,18 @@ object Init extends Logging {
 	  GCoreClasses.registerAll
 
     Scheduler addSchedulerListener EventHandler
-    NWObject registerObjectHandler ObjectHandler
+    
+    // The default object handler just passes all requests on to
+    // G[T](), which will spit out NWhatevers, all implemenations of
+    // IBase -> IObject -> IWhatever
+    NWObject registerObjectHandler new NWObject.ObjectHandler {
+      def handleObjectClass(obj: NWObject, valid: Boolean, objType: Int,
+            resRef: String, tag: String): NWObject =
+        G(obj)
+    }
+
     //NWObject registerEffectHandler EffectHandler
     //NWObject registerItemPropertyHandler IPropHandler
-
 
     // TODO: read all scripts & start up Host
     // Host.registerLanguage(rhino)

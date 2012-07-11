@@ -1,4 +1,4 @@
-package es.elv.kobold.script
+package es.elv.kobold.host
 
 import es.elv.kobold.api._
 import org.nwnx.nwnx2.jvm.NWObject

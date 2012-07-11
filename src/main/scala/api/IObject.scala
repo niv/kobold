@@ -1,22 +1,5 @@
 package es.elv.kobold.api
 
-trait IBase {
-  /** Returns the internal object id. Useful for debugging.
-	  * Will change between server restarts.
-	  */
-	def objectId: Int
-	
-	/** Returns true if this Object is valid and still mapped
-	  * for this ScriptHost. Accessing any object that isn't mapped
-	  * & valid will result in a NoAccessException being thrown.
-	  */
-  def isValid: Boolean
-	
-
-  /** Write something to the script log. */
-  def log(message: String) {}
-}
-
 /** The base game object, from which others inherit functionality
   * common to all objects.
   */
@@ -42,14 +25,7 @@ trait IObject extends IBase /*extends IPersistency*/ {
 	// void setName(String name);
 	
 
-	/**
-	 * Will return true if the currently-running script has
-	 * full access to this object. Accessing any object that
-	 * the running script has no access to will result in a
-	 * NoAccessException being thrown.
-	 */
-	//boolean mayAccess();
-	
+
 	/**
 	 * Will return the distance to other, in fraction of meters.
 	 * Will return for zero if the given object is not in perception

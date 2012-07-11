@@ -1,6 +1,7 @@
 package es.elv.kobold
 
-import impl.api._
+import game._
+
 import org.nwnx.nwnx2.jvm.{NWObject, NWScript}
 
 object GCoreClasses { def registerAll {

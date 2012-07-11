@@ -1,12 +1,32 @@
-package es.elv.kobold.impl.script
+package es.elv.kobold.host
 
 import com.codahale.logula.Logging
-import es.elv.kobold._
-import es.elv.kobold.script._
+
+import org.nwnx.nwnx2.jvm.NWObject
 import es.elv.kobold.api._
-import es.elv.kobold.impl.api._
+import es.elv.kobold._
+import es.elv.kobold.game._
+
 import org.nwnx.nwnx2.jvm.{NWScript, NWObject, NWLocation, NWVector}
 import org.nwnx.nwnx2.jvm.constants.ObjectType
+
+/** The Host manages registered languages and distributes events
+  * to EventListeners. 
+  */
+trait Host extends HostEvents {
+  /** Handle the given event in all registered Contexts. */
+  def handleObjectEvent(objSelf: IObject, eventClass: String,
+    va: List[Object])
+
+  /** Attaches the given context to the given host objects. */
+  def attachContext[EH](ctx: Context[EH], hosts: Set[IObject])
+  
+  /** Detaches the given Context from the given host objects. */
+  def detachContext[EH](ctx: Context[EH], hosts: Set[IObject])
+
+  /** Detaches the given context from all host objects. */
+  def detachContextFromAll[EH](ctx: Context[EH])
+}
 
 object Host extends Host with Logging {
   private var attachMap: Map[Context[_], Set[IObject]] = Map()

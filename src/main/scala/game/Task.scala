@@ -1,8 +1,7 @@
-package es.elv.kobold.impl.api
-
-import es.elv.kobold.impl.script._
+package es.elv.kobold.game
 
 import es.elv.kobold.api._
+import es.elv.kobold.host._
 
 trait BaseTask extends ITask {
   private var _completed = false

@@ -1,4 +1,4 @@
-package es.elv.kobold.impl.api
+package es.elv.kobold.game
 
 import org.nwnx.nwnx2.jvm.{Scheduler, NWObject, NWScript}
 import es.elv.kobold.api._

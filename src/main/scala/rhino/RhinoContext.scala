@@ -4,7 +4,7 @@ import org.mozilla.javascript.Function
 import org.mozilla.javascript.Script
 import org.mozilla.javascript.Scriptable
 
-import es.elv.kobold.script._
+import es.elv.kobold.host._
 
 class RhinoContext(
   val rhino: RhinoImpl, //Language[Function,Context[Function]],

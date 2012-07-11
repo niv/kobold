@@ -1,8 +1,8 @@
-package es.elv.kobold.impl.intf
+package es.elv.kobold.impl.api
 
 import es.elv.kobold.impl.script._
 
-import es.elv.kobold.intf._
+import es.elv.kobold.api._
 
 trait BaseTask extends ITask {
   private var _completed = false

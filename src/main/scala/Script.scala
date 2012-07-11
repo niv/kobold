@@ -1,7 +1,7 @@
 package es.elv.kobold.script
 
 import org.nwnx.nwnx2.jvm.NWObject
-import es.elv.kobold.intf._
+import es.elv.kobold.api._
 import java.util.UUID
 
 /**

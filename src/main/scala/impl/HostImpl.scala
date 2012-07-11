@@ -3,8 +3,8 @@ package es.elv.kobold.impl.script
 import com.codahale.logula.Logging
 import es.elv.kobold._
 import es.elv.kobold.script._
-import es.elv.kobold.intf._
-import es.elv.kobold.impl.intf._
+import es.elv.kobold.api._
+import es.elv.kobold.impl.api._
 import org.nwnx.nwnx2.jvm.{NWScript, NWObject, NWLocation, NWVector}
 import org.nwnx.nwnx2.jvm.constants.ObjectType
 

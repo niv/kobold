@@ -4,8 +4,8 @@ import org.nwnx.nwnx2.jvm._
 
 import es.elv.kobold.{G, GCoreClasses}
 import es.elv.kobold.impl.script.Host
-import es.elv.kobold.impl.intf._
-import es.elv.kobold.intf._
+import es.elv.kobold.impl.api._
+import es.elv.kobold.api._
 import es.elv.kobold.script._
 
 import com.codahale.logula.Logging

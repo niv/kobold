@@ -1,4 +1,4 @@
-package es.elv.kobold.intf
+package es.elv.kobold.api
 
 // An area in the game
 trait IArea extends IObject {

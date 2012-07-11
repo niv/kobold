@@ -1,7 +1,7 @@
-package es.elv.kobold.impl.intf
+package es.elv.kobold.impl.api
 
 import org.nwnx.nwnx2.jvm.{NWObject, NWScript, Scheduler}
-import es.elv.kobold.intf.{IBase, IObject}
+import es.elv.kobold.api.{IBase, IObject}
 import com.codahale.logula.Log
 import es.elv.kobold.G
 

@@ -1,6 +1,6 @@
 package es.elv.kobold.script
 
-import es.elv.kobold.intf._
+import es.elv.kobold.api._
 import org.nwnx.nwnx2.jvm.NWObject
 
 /*

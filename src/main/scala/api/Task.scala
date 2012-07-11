@@ -1,4 +1,4 @@
-package es.elv.kobold.intf
+package es.elv.kobold.api
 
 trait TaskEvents {
   def onTaskStarted(task: ITask)

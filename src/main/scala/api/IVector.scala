@@ -1,4 +1,4 @@
-package es.elv.kobold.intf
+package es.elv.kobold.api
 
 trait IVector2 {
   val x: Float

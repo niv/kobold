@@ -1,7 +1,7 @@
-package es.elv.kobold.impl.intf
+package es.elv.kobold.impl.api
 
 import org.nwnx.nwnx2.jvm.{Scheduler, NWObject, NWScript}
-import es.elv.kobold.intf._
+import es.elv.kobold.api._
 import es.elv.kobold.G
 
 import es.elv.kobold.Implicits._

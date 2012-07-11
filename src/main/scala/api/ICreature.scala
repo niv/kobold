@@ -1,4 +1,4 @@
-package es.elv.kobold.intf
+package es.elv.kobold.api
 
 /**
 A Creature in the game. This includes NPCs, all monsters, and

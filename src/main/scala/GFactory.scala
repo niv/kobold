@@ -1,7 +1,7 @@
 package es.elv.kobold
 
 import org.nwnx.nwnx2.jvm.{NWObject, NWScript}
-import intf._
+import api._
 
 import Implicits._
 import Types._

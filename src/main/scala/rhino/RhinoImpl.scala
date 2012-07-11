@@ -11,7 +11,7 @@ import org.mozilla.javascript.TimeoutError
 import org.mozilla.javascript.TimingContextFactory
 
 import es.elv.kobold.script._
-import es.elv.kobold.intf._
+import es.elv.kobold.api._
 
 class RhinoImpl extends Language[Function,RhinoContext] {
 	val name = "js/rhino"

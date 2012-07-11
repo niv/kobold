@@ -1,8 +1,8 @@
 package es.elv.kobold
 
 import org.nwnx.nwnx2.jvm._
-//import impl.intf._
-import intf._
+//import impl.api._
+import api._
 
 object Implicits {
 	//implicit def eff2nweff(n: Effect): NWEffect = n.toNWEffect

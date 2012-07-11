@@ -1,10 +1,10 @@
-package es.elv.kobold.impl.intf
+package es.elv.kobold.impl.api
 
 import org.nwnx.nwnx2.jvm.NWObject
 import org.nwnx.nwnx2.jvm.NWScript
-import es.elv.kobold.intf._
+import es.elv.kobold.api._
 
-private [intf] class Module extends NObject(new NWObject(0)) with IModule {
+private [api] class Module extends NObject(new NWObject(0)) with IModule {
 }
 
 object Module {

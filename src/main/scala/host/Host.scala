@@ -110,7 +110,7 @@ object Host extends Host with Logging with Accounting {
     withContext {
       attachedTo(objSelf) filter { implicit ctx =>
         withAccounting { try {
-          ctx.executeEventHandler(this, objSelf,
+          ctx.executeEventHandler(objSelf,
               eventClass, convertToAPI(va)) match {
             case Some(_) => true
             case None => false

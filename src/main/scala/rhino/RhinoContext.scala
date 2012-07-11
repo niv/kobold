@@ -4,10 +4,11 @@ import org.mozilla.javascript.Function
 import org.mozilla.javascript.Script
 import org.mozilla.javascript.Scriptable
 
-import es.elv.kobold.host._
+import es.elv.kobold.host.Context
+import es.elv.kobold.host.Language
 
 class RhinoContext(
-  val rhino: RhinoImpl, //Language[Function,Context[Function]],
+  val rhino: RhinoImpl,
   val scope: Scriptable,
   val compiled: Script
 ) extends Context[Function] {

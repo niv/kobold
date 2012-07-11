@@ -31,11 +31,11 @@ trait Context[EH] extends ContextAccounting {
 
   /** Executes the given Event on this context. Returns whatever
     * the EH gave back, or None if no handler was ran. */
-  def executeEventHandler(host: Host, obj: IObject,
+  def executeEventHandler(obj: IObject,
       eventClass: String, va: List[Object]): Option[Any] =
     eventHandlerFor(eventClass) match {
       case Some(eh) =>
-        Some(language.executeEventHandler(host, obj, this, eh, va))
+        Some(language.executeEventHandler(obj, this, eh, va))
       case None => None
     }
 
@@ -55,15 +55,15 @@ trait Language[EH, CTX <: Context[EH]] {
   val name: String
 
   /** Prepares the given source as a Context. */
-  def prepare(host: Host, source: String): CTX
+  def prepare(source: String): CTX
 
   /** Execute the given Context.
     * Called by Host, do not call directly.
     */
-  def execute(host: Host, obj: IObject, script: CTX): Any
+  def execute(obj: IObject, script: CTX): Any
 
   /** Execute the given eventhandler on a context.
     * Returns whatever the EH gave back. */
-  private [host] def executeEventHandler(host: Host, obj: IObject, script: CTX,
+  private [host] def executeEventHandler(obj: IObject, script: CTX,
       eventHandler: EventHandler[EH], va: List[Object]): Any
 }

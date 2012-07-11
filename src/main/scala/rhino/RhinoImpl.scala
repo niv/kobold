@@ -10,8 +10,9 @@ import org.mozilla.javascript.SecureScriptRuntime
 import org.mozilla.javascript.ScriptTimeoutError
 import org.mozilla.javascript.TimingContextFactory
 
-import es.elv.kobold.host._
 import es.elv.kobold.api._
+import es.elv.kobold.host.Language
+import es.elv.kobold.host.EventHandler
 
 import com.codahale.logula.Logging
 
@@ -52,7 +53,7 @@ class RhinoImpl extends Language[Function,RhinoContext] with Logging {
     jsctx
 	}
 
-  def prepare(host: Host, source: String): RhinoContext = {
+  def prepare(source: String): RhinoContext = {
 		try {
 			val ctx = JSCtx.enter()
 			val scope = SecureScriptRuntime.initSecureStandardObjects(ctx, null, true)
@@ -64,7 +65,7 @@ class RhinoImpl extends Language[Function,RhinoContext] with Logging {
 		}
   }
 
-  def execute(host: Host, obj: IObject, ctx: RhinoContext) = {		
+  def execute(obj: IObject, ctx: RhinoContext) = {		
 		try {
 			val jsctx = getContext(obj, ctx)
       ctx.compiled.exec(jsctx, ctx.scope)
@@ -74,7 +75,7 @@ class RhinoImpl extends Language[Function,RhinoContext] with Logging {
 	}
 
 
-  def executeEventHandler(host: Host, obj: IObject, ctx: RhinoContext,
+  def executeEventHandler(obj: IObject, ctx: RhinoContext,
       eh: EventHandler[Function], va: List[Object]) = {
 		try {
 			val jsctx = getContext(obj, ctx)

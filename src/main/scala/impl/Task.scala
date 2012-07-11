@@ -17,8 +17,6 @@ trait BaseTask extends ITask {
   
   def runtime: Long = System.currentTimeMillis - startedOn
   
- 
-
   def setup(host: ICreature, va: List[Object])
   def tick
 

@@ -1,10 +1,12 @@
 package es.elv.kobold.api
 
+/** A two-axis vector. */
 trait IVector2 {
   val x: Float
   val y: Float
 }
 
+/** A three-axis vector, representing the NWScript Vector. */
 trait IVector3 {
   val x: Float
   val y: Float

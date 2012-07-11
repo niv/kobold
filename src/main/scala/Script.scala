@@ -4,18 +4,17 @@ import org.nwnx.nwnx2.jvm.NWObject
 import es.elv.kobold.api._
 import java.util.UUID
 
-/**
-A EventHandler is a Language-specific handler inside a verified Context
-that can be called without knowing the intrinsics.
-EH is the actual handler type that Language will handle.
-*/
+/** A EventHandler is a Language-specific handler inside a verified Context
+  * that can be called without knowing the intrinsics.
+  * EH is the actual handler type that Language will handle.
+  */
 trait EventHandler[EH] {
   def getHandler: EH
 }
 
-/**
-A Context contains a complete, verified script environment
-that can handle events, and is bound to a specific Language. */
+/** A Context contains a complete, verified script environment
+  * that can handle events, and is bound to a specific Language.
+  */
 trait Context[EH] {
   val language: Language[EH,Context[EH]]
 
@@ -39,21 +38,21 @@ trait Context[EH] {
     }
 }
 
-/**
-The Host manages registered languages and distributes events
-to EventListeners. */
+/** The Host manages registered languages and distributes events
+  * to EventListeners. 
+  */
 trait Host extends HostEvents {
-  // Handle the given event in all registered Contexts.
+  /** Handle the given event in all registered Contexts. */
   def handleObjectEvent(objSelf: IObject, eventClass: String,
     va: List[Object])
 
-  // Attaches the given context to the given host objects.
+  /** Attaches the given context to the given host objects. */
   def attachContext[EH](ctx: Context[EH], hosts: Set[IObject])
   
-  // Detaches the given Context from the given host objects.
+  /** Detaches the given Context from the given host objects. */
   def detachContext[EH](ctx: Context[EH], hosts: Set[IObject])
 
-  // Detaches the given context from all host objects.
+  /** Detaches the given context from all host objects. */
   def detachContextFromAll[EH](ctx: Context[EH])
 
   // Returns a set of all objects that are mapped inside the script host.
@@ -74,31 +73,19 @@ trait HostListener {
 }*/
 
 /**
-*/
-trait Language[EH, CTX <: Context[EH]] { //  CTX <: Context[EH]] {
-  // The visible name of this language. Must be unique inside a Host.
+  */
+trait Language[EH, CTX <: Context[EH]] {
+  /** The visible name of this language. Must be unique inside a Host. */
   val name: String
 
-  // Prepares the given source as a Context.
+  /** Prepares the given source as a Context. */
   def prepare(host: Host, source: String): CTX
 
-  // Execute the given Context.
-  // Called by Host, do not call directly.
+  /** Execute the given Context.
+    * Called by Host, do not call directly.
+    */
   def execute(host: Host, obj: IObject, script: CTX): Any
 
   def executeEventHandler(host: Host, obj: IObject, script: CTX,
       eventHandler: EventHandler[EH], va: List[Object]): Any
-}
-
-object Language {
-  /*private var langMap: Map[String, Language[_,_]] = Map()
-  
-  def register[E,C <: Context[E]](l: Language[E,C]) =
-    langMap += ((l.name, l))
-
-  def unregister(name: String) =
-    langMap -= name
-
-  def find[E,C <: Context[E]](name: String): Language[E,C] =
-    langMap.get(name).asInstanceOf[Language[E,C]]*/
 }

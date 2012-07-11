@@ -33,4 +33,16 @@ class NCreature(w: NWObject) extends NObject(w) with ICreature {
     nearObjects[NCreature](1 /*OBJECT_TYPE_CREATURE*/, distance) filter (sees(_)) toArray
 
   def location = NWScript.getLocation(this)
+
+
+  private lazy val taskManager: TaskManager = new TaskManager
+ 
+  //def taskList = 
+
+  def taskList = List()
+  def taskCount = taskManager.taskCount
+  
+  def clear = taskManager.clear
+
+  def taskFollow(o: ICreature, d: Float): ITask = null
 }

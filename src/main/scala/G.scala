@@ -26,13 +26,12 @@ object G extends Logging {
 	private var objectClasses: List[(NWObject, Boolean, ObjectType,
       String, String) => Option[G]] = List()
 
-	/**
-		Register a factory that produces instances of G.
-		You need to be as specific as possible in your matching, or you will break something.
-		Return Some(your G) if you want to handle this NWObject with your class.
-		Return None if the given NWObject does not match your custom class.
-		The parameters passed in are: NWObject, getIsObjectValid, ObjectType, ResRef, Tag
-	*/
+	/** Register a factory that produces instances of G.
+		* You need to be as specific as possible in your matching, or you will break something.
+		* Return Some(your G) if you want to handle this NWObject with your class.
+		* Return None if the given NWObject does not match your custom class.
+		* The parameters passed in are: NWObject, getIsObjectValid, ObjectType, ResRef, Tag
+    */
 	def registerCustomClass(factory: (NWObject, Boolean, ObjectType, String, String) => Option[G]) =
 		objectClasses = factory :: objectClasses
 
@@ -78,14 +77,12 @@ object G extends Logging {
     kk.asInstanceOf[K]
 	}
 
-	/**
-		Returns the first object with the given tag.
-	*/
+	/** Returns the first object with the given tag.
+	  */
 	def byTag(tag: String): G = byTag(tag, 0)
 
-	/**
-		Returns the nth object with the given tag.
-	*/
+	/** Returns the nth object with the given tag.
+	  */
 	def byTag(tag: String, index: Int): G =
 		G(NWScript.getObjectByTag(tag, index))
 

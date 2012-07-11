@@ -1,9 +1,11 @@
 package es.elv.kobold
 
 import org.nwnx.nwnx2.jvm._
-//import impl.api._
 import api._
 
+/** Some implicits that help writing conscise API methods.
+  * Import sparingly - errors are hard to debug.
+  */
 object Implicits {
 	//implicit def eff2nweff(n: Effect): NWEffect = n.toNWEffect
 	//implicit def iprpj2nwiprp(n: ItemProperty): NWItemProperty = n.toNWItemProperty

@@ -35,8 +35,6 @@ class NObject(wrapped: NWObject) extends G(wrapped) with IObject with ActionQueu
   def ipc(target: IObject, message: Object) =
     null // HostImpl.ipc(
 
-  lazy val taskManager: TaskManager = new TaskManager
-
   def name = NWScript.getName(this, false)
 
   def destroy = NWScript.destroyObject(this, 1f)

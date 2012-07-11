@@ -1,6 +1,6 @@
 package es.elv.kobold.api
 
-// An area in the game
+/** An area in the game */
 trait IArea extends IObject {
   /**
    * Returns the weather in the given area.

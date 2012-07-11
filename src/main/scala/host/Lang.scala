@@ -29,13 +29,23 @@ trait Context[EH] {
   def registerEvent(eventClass: String, ev: EventHandler[EH]) =
     eventHandlers += ((eventClass, ev))
 
+  /** Executes the given Event on this context. Returns whatever
+    * the EH gave back, or None if no handler was ran. */
   def executeEventHandler(host: Host, obj: IObject,
-      eventClass: String, va: List[Object]) =
+      eventClass: String, va: List[Object]): Option[Any] =
     eventHandlerFor(eventClass) match {
       case Some(eh) =>
-        language.executeEventHandler(host, obj, this, eh, va)
-      case None =>
+        Some(language.executeEventHandler(host, obj, this, eh, va))
+      case None => None
     }
+
+  final override def toString: String =
+    "%s[%s,%s,%s]".format(
+      this.getClass.getName.split("\\.").last,
+      uuid.toString,
+      eventHandlers.keySet.mkString(";"),
+      Host.attachedObjects(this).mkString(";")
+    )
 }
 
 /**
@@ -52,6 +62,8 @@ trait Language[EH, CTX <: Context[EH]] {
     */
   def execute(host: Host, obj: IObject, script: CTX): Any
 
-  def executeEventHandler(host: Host, obj: IObject, script: CTX,
+  /** Execute the given eventhandler on a context.
+    * Returns whatever the EH gave back. */
+  private [host] def executeEventHandler(host: Host, obj: IObject, script: CTX,
       eventHandler: EventHandler[EH], va: List[Object]): Any
 }

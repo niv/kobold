@@ -22,8 +22,10 @@ private [glue] object EventHandler extends SchedulerListener with Logging {
 
   def event(objSelf: NWObject, event: String) {
     implicit val self = objSelf
+    val start = System.currentTimeMillis
     log.debug("event: " + event + " on " + objSelf)
-    E(event, objSelf) match {
+    
+    val ctx: Set[Context[_]] = E(event, objSelf) match {
       case E("creature_spawn", o: ICreature) =>
         e(o)("creature.spawn")
       
@@ -38,13 +40,18 @@ private [glue] object EventHandler extends SchedulerListener with Logging {
         else if (seen) e(o)("creature.sees", last)
         else if (vanished) e(o)("creature.seesnot", last)
         else if (inaudible) e(o)("creature.hearsnot", last)
+        else Set()
 
-      case E("creature_hb", o: ICreature) =>
+      //case E("creature_hb", o: ICreature) =>
         // Host.onCreatureHB(o) // for task manager!
 
       case e =>
         log.debug("unhandled: " + e)
+        Set()
     }
+    val end = System.currentTimeMillis
+
+    log.debug("  handlers: %d, %d ms".format(ctx.size, end-start))
 
     Scheduler.flushQueues
   }

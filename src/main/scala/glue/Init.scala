@@ -21,6 +21,7 @@ private [glue] object Init extends Logging {
     log.level = Level.DEBUG
     log.console.enabled = true
     log.console.threshold = Level.DEBUG
+    log.loggers("es.elv.kobold.G") = Level.WARN
   }
 
   val rhino = new RhinoImpl

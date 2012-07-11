@@ -14,9 +14,11 @@ import org.nwnx.nwnx2.jvm.constants.ObjectType
   * to EventListeners.
   */
 trait Host extends HostEvents {
-  /** Handle the given event in all registered Contexts. */
+  /** Handle the given event in all registered Contexts.
+    * Returns the set of contexts that ran the handler.
+    */
   def handleObjectEvent(objSelf: IObject, eventClass: String,
-    va: List[Object])
+    va: List[Object]): Set[Context[_]]
 
   /** Attaches the given context to the given host objects. */
   def attachContext[EH](ctx: Context[EH], hosts: Set[IObject])
@@ -26,6 +28,12 @@ trait Host extends HostEvents {
 
   /** Detaches the given context from all host objects. */
   def detachContextFromAll[EH](ctx: Context[EH])
+
+  /** Returns a set of attached objects to the given context. */
+  def attachedObjects[EH](ctx: Context[EH]): Set[IObject]
+
+  /** Returns a set of attached contexts to the given object. */
+  def attachedContexts(o: IObject): Set[Context[_]]
 
   /** Returns the current objectSelf, or None if no script is running. */
   def currentObjectSelf: Option[IBase]
@@ -56,6 +64,12 @@ object Host extends Host with Logging {
     log.debug("detaching " + ctx)
     attachMap -= (ctx)
   }
+  
+  def attachedObjects[EH](ctx: Context[EH]): Set[IObject] =
+    attachMap.getOrElse(ctx, Set())
+  
+  def attachedContexts(o: IObject): Set[Context[_]] =
+    attachedTo(o)
 
   private def attachedTo(o: IObject): Set[Context[_]] =
     attachMap filter ((s) => s._2 contains o) keySet
@@ -76,26 +90,33 @@ object Host extends Host with Logging {
 
   private var _currentObjectSelf: Option[IBase] = None
   def currentObjectSelf = _currentObjectSelf
-
-  def handleObjectEvent(objSelf: IObject, eventClass: String,
-      va: List[Object]) {
-
+  private def withContext[A](objSelf: IObject)(c: => A): A =
     try {
       _currentObjectSelf = Some(objSelf)
-
-      attachedTo(objSelf) foreach { ctx =>
-        try {
-          ctx.executeEventHandler(this, objSelf, eventClass, convertToAPI(va))
-        } catch {
-          case x: org.mozilla.javascript.EcmaError =>
-            log.error(x, "in " + eventClass + " of " + ctx)
-            detachContextFromAll(ctx)
-
-          case any => throw any
-        }
-      }
+      c
     } finally {
       _currentObjectSelf = None
+    }
+
+
+  def handleObjectEvent(objSelf: IObject, eventClass: String,
+      va: List[Object]): Set[Context[_]] = {
+    
+    withContext(objSelf) {
+      attachedTo(objSelf) filter { ctx =>
+        try {
+          ctx.executeEventHandler(this, objSelf,
+              eventClass, convertToAPI(va)) match {
+            case Some(_) => true
+            case None => false
+          }
+        } catch {
+          case x =>
+            log.error(x, "in " + eventClass + " of " + ctx)
+            detachContextFromAll(ctx)
+            false
+        }
+      }
     }
   }
 

@@ -108,7 +108,7 @@ class RhinoImpl extends Language[Function,RhinoContext] {
         }*/
 				
         eh.getHandler.call(jsctx, ctx.scope, thisObj, va2)
-				
+
 			} catch {
         case tmi: TimeoutError => throw new Exception("TMI")
 			}

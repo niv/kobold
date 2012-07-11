@@ -41,7 +41,7 @@ trait Host extends HostEvents {
   /** Sends a inter-object message.
     * Returns true if the message was delivered successfully.
     */
-  def ipc(source: IObject, target: IObject, message: Object): Boolean
+  def message(source: IObject, target: IObject, message: Object): Boolean
 }
 
 object Host extends Host with Logging {
@@ -120,9 +120,9 @@ object Host extends Host with Logging {
     }
   }
 
-  def ipc(source: IObject, target: IObject, message: Object) = {
+  def message(source: IObject, target: IObject, message: Object) = {
     require(currentObjectSelf.isEmpty)
-    handleObjectEvent(target, "ipc", List(source, message))
+    handleObjectEvent(target, "message", List(source, message))
     true
   }
 

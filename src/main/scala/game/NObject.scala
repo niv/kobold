@@ -19,10 +19,9 @@ class NObject(wrapped: NWObject) extends G(wrapped) with IObject with ActionQueu
   override def log(message: String) =
     _log.debug(message)
 
-  def ipc(target: IObject, message: Object) = <= {
-      log("sending ipc to " + target + ": " + message)
-      Host.ipc(this, target, message)
-    }
+  def message(target: IObject, message: Object) = <= {
+    Host.message(this, target, message)
+  }
 
   def mayAccess = Host.currentObjectSelf match {
     case Some(o) => o.objectId == this.objectId

@@ -9,11 +9,11 @@ import es.elv.kobold.Implicits._
 class NCreature(w: NWObject) extends NObject(w) with ICreature {
   lazy val isPlayer = NWScript.getIsPC(this)
 
-  def say(m: String) = assign {
+  def say(m: String) = <= {
     NWScript.speakString(m, 0)
   }
 
-  def whisper(message: String) = assign {
+  def whisper(message: String) = <= {
     NWScript.speakString(message, 1)
   }
   

@@ -8,13 +8,13 @@ import org.nwnx.nwnx2.jvm.{NWObject, NWScript, Scheduler}
 trait ActionQueue {
   this: NObject =>
   
-  def assign(closure: => Unit) =
-    Scheduler.assign(this, new Runnable() {
-      def run = closure
+  def <=(closure: => Unit): Unit =
+    Scheduler.assign(this, new Runnable {
+      def run { closure }
     })
 
-  def delay(ms: Long)(closure: => Unit) =
-    Scheduler.delay(this, ms, new Runnable() {
-      def run = closure
+  def <+(ms: Long)(closure: => Unit): Unit =
+    Scheduler.delay(this, ms, new Runnable {
+      def run { closure }
     })
 }

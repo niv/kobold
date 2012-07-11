@@ -10,6 +10,8 @@ import es.elv.kobold.game._
 import org.nwnx.nwnx2.jvm.{Scheduler, NWScript, NWObject, NWLocation, NWVector}
 import org.nwnx.nwnx2.jvm.constants.ObjectType
 
+import org.mozilla.javascript.ScriptTimeoutError
+
 /** The Host manages registered languages and distributes events
   * to EventListeners.
   */
@@ -17,8 +19,8 @@ trait Host extends HostEvents {
   /** Handle the given event in all registered Contexts.
     * Returns the set of contexts that ran the handler.
     */
-  def handleObjectEvent(objSelf: IObject, eventClass: String,
-    va: List[Object]): Set[Context[_]]
+  def handleObjectEvent(eventClass: String, va: List[Object])
+    (implicit objSelf: IObject): Set[Context[_]]
 
   /** Attaches the given context to the given host objects. */
   def attachContext[EH](ctx: Context[EH], hosts: Set[IObject])
@@ -39,12 +41,12 @@ trait Host extends HostEvents {
   def currentObjectSelf: Option[IBase]
 
   /** Sends a inter-object message.
-    * Returns true if the message was delivered successfully.
     */
-  def message(source: IObject, target: IObject, message: Object): Boolean
+  def message(source: IObject, message: Object)
+    (implicit target: IObject with ActionQueue)
 }
 
-object Host extends Host with Logging {
+object Host extends Host with Logging with Accounting {
   private var attachMap: Map[Context[_], Set[IObject]] = Map()
 
   def attachContext[EH](ctx: Context[EH], hosts: Set[IObject]) =
@@ -90,7 +92,7 @@ object Host extends Host with Logging {
 
   private var _currentObjectSelf: Option[IBase] = None
   def currentObjectSelf = _currentObjectSelf
-  private def withContext[A](objSelf: IObject)(c: => A): A =
+  private def withContext[A](c: => A)(implicit objSelf: IObject): A =
     try {
       require(currentObjectSelf.isEmpty)
       _currentObjectSelf = Some(objSelf)
@@ -100,33 +102,37 @@ object Host extends Host with Logging {
     }
 
 
-  def handleObjectEvent(objSelf: IObject, eventClass: String,
-      va: List[Object]): Set[Context[_]] = {
+  def handleObjectEvent(eventClass: String, va: List[Object])
+    (implicit objSelf: IObject): Set[Context[_]] = {
 
     log.debug(eventClass + " -> "  + objSelf + ": " + va)
-    withContext(objSelf) {
-      attachedTo(objSelf) filter { ctx =>
-        try {
+
+    withContext {
+      attachedTo(objSelf) filter { implicit ctx =>
+        withAccounting { try {
           ctx.executeEventHandler(this, objSelf,
               eventClass, convertToAPI(va)) match {
             case Some(_) => true
             case None => false
           }
         } catch {
-          case x =>
-            log.error(x, "in " + eventClass + " of " + ctx)
+          case tmi: ScriptTimeoutError =>
+            log.error(tmi, "TMI in " + eventClass + " of " + ctx)
             detachContextFromAll(ctx)
             false
-        }
+
+          case other =>
+            log.error(other, "ERROR in " + eventClass + " of " + ctx)
+            detachContextFromAll(ctx)
+            false
+         } }
       }
     }
   }
 
-  def message(source: IObject, target: IObject, message: Object) = {
-    require(currentObjectSelf.isEmpty)
-    handleObjectEvent(target, "message", List(source, message))
-    true
-  }
+  def message(source: IObject, message: Object)
+      (implicit target: IObject with ActionQueue) =
+    target <= handleObjectEvent("message", List(source, message))
 
   override def onCreatureHB(c: ICreature) =
     if (attachedTo(c).size > 0) c match {
@@ -135,9 +141,9 @@ object Host extends Host with Logging {
     }
 
   def onTaskStarted(obj: ICreature with ActionQueue, task: ITask) =
-    obj <= handleObjectEvent(obj, "task.started", List(task))
+    obj <= handleObjectEvent("task.started", List(task))(obj)
   def onTaskCompleted(obj: ICreature with ActionQueue, task: ITask) =
-    obj <= handleObjectEvent(obj, "task.completed", List(task))
+    obj <= handleObjectEvent("task.completed", List(task))(obj)
   def onTaskCancelled(obj: ICreature with ActionQueue, task: ITask) =
-    obj <= handleObjectEvent(obj, "task.cancelled", List(task))
+    obj <= handleObjectEvent("task.cancelled", List(task))(obj)
 }

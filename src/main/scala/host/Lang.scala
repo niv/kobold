@@ -15,7 +15,7 @@ trait EventHandler[EH] {
 /** A Context contains a complete, verified script environment
   * that can handle events, and is bound to a specific Language.
   */
-trait Context[EH] {
+trait Context[EH] extends ContextAccounting {
   val language: Language[EH,Context[EH]]
 
   val uuid: UUID = UUID.randomUUID

@@ -7,13 +7,15 @@ import org.mozilla.javascript.Script
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.SecureClassShutter
 import org.mozilla.javascript.SecureScriptRuntime
-import org.mozilla.javascript.TimeoutError
+import org.mozilla.javascript.ScriptTimeoutError
 import org.mozilla.javascript.TimingContextFactory
 
 import es.elv.kobold.host._
 import es.elv.kobold.api._
 
-class RhinoImpl extends Language[Function,RhinoContext] {
+import com.codahale.logula.Logging
+
+class RhinoImpl extends Language[Function,RhinoContext] with Logging {
 	val name = "js/rhino"
 
   private val cf: TimingContextFactory =
@@ -27,7 +29,7 @@ class RhinoImpl extends Language[Function,RhinoContext] {
       classOf[IArea], //Item.class, IModule.class, IPlaceable.class,
       classOf[IPersistency], classOf[ILocation],
       classOf[IVector2], classOf[IVector3],
-      //ITask.class,
+      classOf[ITask],
       //ISystem.class,
       classOf[IScriptEventRegistry[_]]
   )
@@ -39,8 +41,8 @@ class RhinoImpl extends Language[Function,RhinoContext] {
 	classShutter.addAllowedStartsWith("es.elv.kobold.lang.rhino.")
 
 	private def getContext(host: IObject, ctx: RhinoContext): JSCtx = {
-		val jsctx = cf.enterContext(150)
-		jsctx.setWrapFactory(wrapFactory)
+    val jsctx = cf.enterContext(ctx.remainingRuntime)
+    jsctx.setWrapFactory(wrapFactory)
 		jsctx.setClassShutter(classShutter)
 		
 		//script.getScope().put("MODULE", script.getScope(), new NModule())
@@ -51,8 +53,6 @@ class RhinoImpl extends Language[Function,RhinoContext] {
 	}
 
   def prepare(host: Host, source: String): RhinoContext = {
-		val start = System.currentTimeMillis()
-		
 		try {
 			val ctx = JSCtx.enter()
 			val scope = SecureScriptRuntime.initSecureStandardObjects(ctx, null, true)
@@ -61,63 +61,33 @@ class RhinoImpl extends Language[Function,RhinoContext] {
 			new RhinoContext(this, scope, s)
 		} finally {
 			JSCtx.exit()
-			
-			val end = System.currentTimeMillis()
-			//log.debug("Verify in " + (end - start) + "ms")
 		}
   }
 
   def execute(host: Host, obj: IObject, ctx: RhinoContext) = {		
-		val start = System.currentTimeMillis()
-		
 		try {
 			val jsctx = getContext(obj, ctx)
-
-			try {
-				ctx.compiled.exec(jsctx, ctx.scope)
-			} catch {
-        case tmi: TimeoutError => throw new Exception("TMI")
-			}
-			
+      ctx.compiled.exec(jsctx, ctx.scope)
 		} finally {
 			JSCtx.exit
-			
-			val end = System.currentTimeMillis()
-			// log.debug("Script in " + (end - start) + "ms")
 		}
 	}
 
 
   def executeEventHandler(host: Host, obj: IObject, ctx: RhinoContext,
       eh: EventHandler[Function], va: List[Object]) = {
-
-    val start = System.currentTimeMillis()
-		
 		try {
 			val jsctx = getContext(obj, ctx)
 			
 			val thisObj = jsctx.getWrapFactory().wrapAsJavaObject(jsctx, ctx.scope,
 					obj, obj.getClass)
 			
-			try {
-				val va2 = va map { JSCtx.javaToJS(_, ctx.scope) } toArray
+      val va2 = va map { JSCtx.javaToJS(_, ctx.scope) } toArray
         
-        /*new Array[Object](va.length)
-        va map for (i <- 0 until va.length) {
-					va2(i) = JSCtx.javaToJS(va(i), ctx.scope)
-        }*/
-				
-        eh.getHandler.call(jsctx, ctx.scope, thisObj, va2)
+      eh.getHandler.call(jsctx, ctx.scope, thisObj, va2)
 
-			} catch {
-        case tmi: TimeoutError => throw new Exception("TMI")
-			}
-			
 		} finally {
 			JSCtx.exit
-			
-			val end = System.currentTimeMillis()
-			//log.debug("Event handler in " + (end - start) + "ms")
 		}
   }
 }

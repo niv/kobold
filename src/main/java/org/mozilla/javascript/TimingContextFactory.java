@@ -14,6 +14,10 @@ public class TimingContextFactory extends ContextFactory {
 		protected long startTime;
     };
 
+	static {
+		ContextFactory.initGlobal(new TimingContextFactory());
+	};
+
 	public Context enterContext(long timeout) {
 		MyContext ctx = (MyContext) super.enterContext();
 		
@@ -23,13 +27,14 @@ public class TimingContextFactory extends ContextFactory {
     
     @Override
     protected Context makeContext() {
-    	Context ctx = new MyContext();
-    	ctx.setInstructionObserverThreshold(10000);
+		Context ctx = new MyContext();
+	ctx.setOptimizationLevel(-1);
+		ctx.setInstructionObserverThreshold(1000);
     	return ctx;
     };
     
 	protected void observeInstructionCount(Context cx, int instructionCount) {
-         MyContext mcx = (MyContext)cx;
+		 MyContext mcx = (MyContext)cx;
          long currentTime = System.currentTimeMillis();
          if (currentTime - mcx.startTime > mcx.timeout) {
              // More then x ms from Context creation time:

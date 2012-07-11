@@ -19,8 +19,10 @@ class NObject(wrapped: NWObject) extends G(wrapped) with IObject with ActionQueu
   override def log(message: String) =
     _log.debug(message)
 
-  def message(target: IObject, message: Object) = <= {
-    Host.message(this, target, message)
+  def message(target: IObject, message: Object) = target match {
+    case vv: IObject with ActionQueue =>
+      Host.message(this, message)(vv)
+    case _ => log("Cannot send message, invalid target object.")
   }
 
   def mayAccess = Host.currentObjectSelf match {

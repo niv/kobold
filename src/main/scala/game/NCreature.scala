@@ -34,15 +34,17 @@ class NCreature(w: NWObject) extends NObject(w) with ICreature {
 
   def location = NWScript.getLocation(this)
 
+  lazy val taskManager: TaskManager = new TaskManager(this)
 
-  private lazy val taskManager: TaskManager = new TaskManager
- 
-  //def taskList = 
+  def busy = taskManager.taskList.size > 0
 
-  def taskList = List()
-  def taskCount = taskManager.taskCount
+  def taskList = taskManager.taskList.toArray
+  // def taskCount = taskManager.taskCount
   
   def clear = taskManager.clear
 
-  def taskFollow(o: ICreature, d: Float): ITask = null
+  def taskFollow(o: ICreature, d: Float): ITask = {
+    checkAccess
+    taskManager << new FollowTask(this, o, d)
+  }
 }

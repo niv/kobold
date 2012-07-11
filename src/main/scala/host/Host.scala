@@ -92,6 +92,7 @@ object Host extends Host with Logging {
   def currentObjectSelf = _currentObjectSelf
   private def withContext[A](objSelf: IObject)(c: => A): A =
     try {
+      require(currentObjectSelf.isEmpty)
       _currentObjectSelf = Some(objSelf)
       c
     } finally {
@@ -101,7 +102,8 @@ object Host extends Host with Logging {
 
   def handleObjectEvent(objSelf: IObject, eventClass: String,
       va: List[Object]): Set[Context[_]] = {
-    
+
+    log.debug(eventClass + " -> "  + objSelf + ": " + va)
     withContext(objSelf) {
       attachedTo(objSelf) filter { ctx =>
         try {
@@ -126,19 +128,16 @@ object Host extends Host with Logging {
     true
   }
 
-  //override def onCreatureHB(c: ICreature) =
-  //  attachedTo(c) foreach {
-  //    _.eventHandlerFor("creature.hb")
-  //  }
-    //if (true /*isAttachedAnywhereToScript*/)
-    //  c.taskManager.tick
-      /*_mappedObj.get(c.objectId) match {
-        case Some(no) =>
-          no.taskManager.tick
-        case None =>
-      }*/
+  override def onCreatureHB(c: ICreature) =
+    if (attachedTo(c).size > 0) c match {
+      case o: NCreature => o.taskManager.tick
+      case _ =>
+    }
 
-  def onTaskStarted(task: ITask) {}
-  def onTaskCompleted(task: ITask) {}
-  def onTaskCancelled(task: ITask) {}
+  def onTaskStarted(obj: ICreature with ActionQueue, task: ITask) =
+    obj <= handleObjectEvent(obj, "task.started", List(task))
+  def onTaskCompleted(obj: ICreature with ActionQueue, task: ITask) =
+    obj <= handleObjectEvent(obj, "task.completed", List(task))
+  def onTaskCancelled(obj: ICreature with ActionQueue, task: ITask) =
+    obj <= handleObjectEvent(obj, "task.cancelled", List(task))
 }

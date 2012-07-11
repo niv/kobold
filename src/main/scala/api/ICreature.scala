@@ -6,18 +6,20 @@ player characters, but NOT dungeon masters.
 */
 trait ICreature extends IObject {
   /** Forgets all tasks, stops all timers, and clears
-    * any associated local state.
+    * any associated local state. This will stop
+    * this creature, even when in combat.
     */
-  //def clear
+  def clear
   
-  /** Returns the number of current task list of this Creature.
+  /** Returns true if this creature is currently deliberately busy
+    * (i.e. tasks are scheduled and executing).
     */
-  //def taskCount: Int
+  def busy: Boolean
   
   /** Return the task list of this Creature. May be empty.
     * The active task is at the head of the list.
     */
-  //def taskList: List[ITask]
+  def taskList: Array[ITask]
   
   /** Return true if this Creature is a player character.
     */
@@ -52,7 +54,7 @@ trait ICreature extends IObject {
     * 
     * Will enqueue as a task.
     */
-  //def taskFollow(other: ICreature, followDistance: Float): ITask
+  def taskFollow(other: ICreature, followDistance: Float): ITask
   
   /** Task this creature to walk to the given waypoint.
     */

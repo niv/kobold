@@ -1,7 +1,7 @@
 package es.elv.kobold.game
 
 import org.nwnx.nwnx2.jvm.{NWObject, NWScript, Scheduler}
-import es.elv.kobold.api.{IBase, IObject}
+import es.elv.kobold.api.{IBase, IObject, ActionQueue}
 import es.elv.kobold.host.Host
 import com.codahale.logula.Log
 import es.elv.kobold.G

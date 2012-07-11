@@ -1,7 +1,13 @@
 package es.elv.kobold.game
 
 import es.elv.kobold.api._
-import es.elv.kobold.host._
+import es.elv.kobold.host.Host
+
+trait TaskEvents {
+  def onTaskStarted(obj: ICreature with ActionQueue, task: ITask)
+  def onTaskCompleted(obj: ICreature with ActionQueue, task: ITask)
+  def onTaskCancelled(obj: ICreature with ActionQueue, task: ITask)
+}
 
 trait BaseTask extends ITask {
   private var _completed = false
@@ -16,7 +22,6 @@ trait BaseTask extends ITask {
   
   def runtime: Long = System.currentTimeMillis - startedOn
   
-  def setup(host: ICreature, va: List[Object])
   def tick
 
   def complete = if (!isDead) _completed = true
@@ -25,7 +30,7 @@ trait BaseTask extends ITask {
 
 class TaskDeadException extends RuntimeException
 
-class TaskManager {
+class TaskManager(private val parent: ICreature with ActionQueue) {
   private val q = scala.collection.mutable.Queue[BaseTask]()
   private var current: Option[BaseTask] = None
 
@@ -33,18 +38,20 @@ class TaskManager {
     current match {
       case Some(ta) =>
         ta.cancel
-        Host.onTaskCancelled(ta)
+        Host.onTaskCancelled(parent, ta)
         current = None
       case None =>
     }
-    for (task <- q) Host.onTaskCancelled(task)
+    for (task <- q) Host.onTaskCancelled(parent, task)
     q.clear
   }
 
-  def add(task: BaseTask) {
+  def <<(task: BaseTask) = add(task)
+  def add(task: BaseTask): BaseTask = {
     if(task.isDead) throw new TaskDeadException
     q += task
     schedule
+    task
   }
 
   def tick {
@@ -58,23 +65,30 @@ class TaskManager {
 
   def taskCount: Int = 0
 
+  def taskList = current match {
+    case Some(task) =>
+      task :: q.toList
+    case None =>
+      q.toList
+    }
+
   private def schedule {
     if (current.isEmpty && q.size == 0)
       return
     
     if (current.isDefined && current.get.isCompleted) {
-      Host.onTaskCompleted(current.get)
+      Host.onTaskCompleted(parent, current.get)
       current = None
     }
 
     if (current.isDefined && current.get.isCancelled) {
-      Host.onTaskCancelled(current.get)
+      Host.onTaskCancelled(parent, current.get)
       current = None
     }
     
     if (current.isEmpty && q.size > 0) {
       current = Some(q.dequeue)
-      Host.onTaskStarted(current.get)
+      Host.onTaskStarted(parent, current.get)
     }
   }
 }

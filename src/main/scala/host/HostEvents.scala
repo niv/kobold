@@ -8,12 +8,12 @@ import org.nwnx.nwnx2.jvm.NWObject
   * Host.onObjectEvent(); this is for API logic
   * and modules.
   */
-trait HostEvents extends TaskEvents {
+trait HostEvents extends es.elv.kobold.game.TaskEvents {
   /*
   def onModuleLoad(module: IModule) {}
   def onModuleHB(module: IModule) {}
   def onCreatureSpawn(creature: ICreature) {}
-  def onCreatureHB(creature: ICreature) {}
   */
+  def onCreatureHB(creature: ICreature)
 }
 

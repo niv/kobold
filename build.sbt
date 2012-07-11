@@ -14,6 +14,7 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= Seq(
+	"commons-configuration" % "commons-configuration" % "1.8",
 	"org.scalacheck" %% "scalacheck" % "1.10.0" % "test",
 	"com.codahale" %% "logula" % "2.1.3"
 	//"org.specs2" %% "specs2" % "1.11" % "test"

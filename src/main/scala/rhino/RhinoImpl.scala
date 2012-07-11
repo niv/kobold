@@ -34,8 +34,8 @@ class RhinoImpl extends Language[Function,RhinoContext] {
 	
   private val classShutter: SecureClassShutter =
     new SecureClassShutter(wrapFactory)
-  classShutter.addAllowedStartsWith("es.elv.kobold.intf.")
-  classShutter.addAllowedStartsWith("es.elv.kobold.impl.intf.")
+  classShutter.addAllowedStartsWith("es.elv.kobold.api.")
+  classShutter.addAllowedStartsWith("es.elv.kobold.game.")
 	classShutter.addAllowedStartsWith("es.elv.kobold.lang.rhino.")
 
 	private def getContext(host: IObject, ctx: RhinoContext): JSCtx = {

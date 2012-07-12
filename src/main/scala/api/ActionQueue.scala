@@ -7,7 +7,7 @@ import org.nwnx.nwnx2.jvm.{NWObject, NWScript, Scheduler}
   */
 trait ActionQueue {
   this: IObject =>
-  
+
   private [kobold] def <=(closure: => Unit): Unit =
     Scheduler.assign(new NWObject(this.objectId), new Runnable {
       def run { closure }

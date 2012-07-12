@@ -25,13 +25,13 @@ object IVector2 {
 
 object IVector3 {
   val ORIGIN = IVector3(0, 0, 0)
-  
+
   def apply(_x: Float, _y: Float, _z: Float) =
     new IVector3 {
       val x = _x
       val y = _y
       val z = _z
-      
+
       override def toString = "IVector3(%f,%f,%f)".format(x,y,z)
     }
 }

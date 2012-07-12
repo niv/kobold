@@ -80,10 +80,10 @@ object Host extends Host with Logging with Accounting {
     attachMap -= (ctx)
     existing
   }
-  
+
   def attachedObjects[EH](ctx: Context[EH]): Set[IObject] =
     attachMap.getOrElse(ctx, Set())
-  
+
   def attachedContexts(o: IObject): Set[Context[_]] =
     attachedTo(o)
 

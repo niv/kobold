@@ -29,7 +29,7 @@ abstract class TaskableAction(
     super.cancel
     stopDoingAction
   }
- 
+
   // You can override this if neccessary.
   protected def stopDoingAction {
     NWScript.clearAllActions(false)

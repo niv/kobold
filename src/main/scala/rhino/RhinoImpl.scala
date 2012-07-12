@@ -17,13 +17,13 @@ import es.elv.kobold.host.EventHandler
 import com.codahale.logula.Logging
 
 class RhinoImpl extends Language[Function,RhinoContext] with Logging {
-	val name = "js/rhino"
+  val name = "js/rhino"
 
   private val cf: TimingContextFactory =
     new TimingContextFactory()
 
   private val wrapFactory: DefaultSecureWrapFactory =
-		new DefaultSecureWrapFactory()
+    new DefaultSecureWrapFactory()
   wrapFactory.addAllowedNatives(
       // Script Context and Helpers
       classOf[IContext[_]],
@@ -38,60 +38,60 @@ class RhinoImpl extends Language[Function,RhinoContext] with Logging {
       // Tasking
       classOf[ITask]
   )
-	
+
   private val classShutter: SecureClassShutter =
     new SecureClassShutter(wrapFactory)
   classShutter.addAllowedStartsWith("es.elv.kobold.api.")
   classShutter.addAllowedStartsWith("es.elv.kobold.game.")
-	classShutter.addAllowedStartsWith("es.elv.kobold.lang.rhino.")
+  classShutter.addAllowedStartsWith("es.elv.kobold.lang.rhino.")
 
-	private def getContext(host: IObject, ctx: RhinoContext): JSCtx = {
+  private def getContext(host: IObject, ctx: RhinoContext): JSCtx = {
     val jsctx = cf.enterContext(ctx.remainingRuntime)
     jsctx.setWrapFactory(wrapFactory)
-		jsctx.setClassShutter(classShutter)
+    jsctx.setClassShutter(classShutter)
 
-		//script.getScope().put("MODULE", script.getScope(), new NModule())
-		ctx.scope.put("host", ctx.scope, JSCtx.javaToJS(host, ctx.scope))
+    //script.getScope().put("MODULE", script.getScope(), new NModule())
+    ctx.scope.put("host", ctx.scope, JSCtx.javaToJS(host, ctx.scope))
     ctx.scope.put("ctx", ctx.scope, ctx)
     jsctx
-	}
-
-  def prepare(source: String): RhinoContext = {
-		try {
-			val ctx = JSCtx.enter()
-			val scope = SecureScriptRuntime.initSecureStandardObjects(ctx, null, true)
-			val s = ctx.compileString(source, "", 0, null)
-			
-			new RhinoContext(this, scope, s)
-		} finally {
-			JSCtx.exit()
-		}
   }
 
-  def execute(obj: IObject, ctx: RhinoContext) = {		
-		try {
-			val jsctx = getContext(obj, ctx)
+  def prepare(source: String): RhinoContext = {
+    try {
+      val ctx = JSCtx.enter()
+      val scope = SecureScriptRuntime.initSecureStandardObjects(ctx, null, true)
+      val s = ctx.compileString(source, "", 0, null)
+
+      new RhinoContext(this, scope, s)
+    } finally {
+      JSCtx.exit()
+    }
+  }
+
+  def execute(obj: IObject, ctx: RhinoContext) = {
+    try {
+      val jsctx = getContext(obj, ctx)
       ctx.compiled.exec(jsctx, ctx.scope)
-		} finally {
-			JSCtx.exit
-		}
-	}
+    } finally {
+      JSCtx.exit
+    }
+  }
 
 
   def executeEventHandler(obj: IObject, ctx: RhinoContext,
       eh: EventHandler[Function], va: List[Object]) = {
-		try {
-			val jsctx = getContext(obj, ctx)
-			
-			val thisObj = jsctx.getWrapFactory().wrapAsJavaObject(jsctx, ctx.scope,
-					obj, obj.getClass)
-			
+    try {
+      val jsctx = getContext(obj, ctx)
+
+      val thisObj = jsctx.getWrapFactory().wrapAsJavaObject(jsctx, ctx.scope,
+          obj, obj.getClass)
+
       val va2 = va map { JSCtx.javaToJS(_, ctx.scope) } toArray
-        
+
       eh.getHandler.call(jsctx, ctx.scope, thisObj, va2)
 
-		} finally {
-			JSCtx.exit
-		}
+    } finally {
+      JSCtx.exit
+    }
   }
 }

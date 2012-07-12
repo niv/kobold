@@ -36,7 +36,7 @@ private [glue] object Init extends Logging {
     val scripts: Array[File] = for (f <- new File(scriptDir).listFiles if
         """\.js$""".r.findFirstIn(f.getName).isDefined
       ) yield f
-    
+
     scripts foreach { f  =>
       log.info("Loading " + f.getName)
       val src = io.Source.fromFile(f).mkString
@@ -61,12 +61,12 @@ private [glue] object Init extends Logging {
       case _ => throw new Exception("invalid byOID config")
     }
   } }
-  
+
   def init {
-	  GCoreClasses.registerAll
+    GCoreClasses.registerAll
 
     Scheduler addSchedulerListener EventHandler
-    
+
     // The default object handler just passes all requests on to
     // G[T](), which will spit out NWhatevers, all implemenations of
     // IBase -> IObject -> IWhatever
@@ -76,6 +76,6 @@ private [glue] object Init extends Logging {
         G(obj)
     }
   }
-  
+
   def shutdown {}
 }

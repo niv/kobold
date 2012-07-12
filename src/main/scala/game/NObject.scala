@@ -9,7 +9,7 @@ class NoAccessException extends RuntimeException
 
 class NObject(wrapped: NWObject) extends G(wrapped) with IObject
     with ActionQueue {
-  
+
   protected implicit def n2nw(n: NObject): NWObject =
     n.wrapped
   protected implicit def i2n(o: IBase): NWObject =

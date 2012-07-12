@@ -13,7 +13,7 @@ class RhinoContext(
   val scope: Scriptable,
   val compiled: Script
 ) extends Context[Function] {
-  
+
   override val language = rhino.
     asInstanceOf[Language[Function,Context[Function]]]
 

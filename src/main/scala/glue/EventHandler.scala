@@ -56,7 +56,7 @@ private [glue] object EventHandler extends SchedulerListener with Logging {
 
       case E("creature_spawn", o: ICreature) =>
         e(o)("creature.spawn")
-      
+
       case E("creature_perc", o: ICreature) =>
         val (heard, seen, inaudible, vanished, last) = (
           NWScript.getLastPerceptionHeard, NWScript.getLastPerceptionSeen,

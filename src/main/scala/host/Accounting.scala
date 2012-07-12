@@ -8,8 +8,8 @@ import es.elv.kobold._
 import org.nwnx.nwnx2.jvm.{Scheduler, NWScript, NWObject, NWLocation, NWVector}
 
 trait ContextAccounting {
-  this: Context[_] => 
- 
+  this: Context[_] =>
+
   /** The total time (in ms) this context has taken since creation. */
   var totalRuntime: Long = 0
 
@@ -31,7 +31,7 @@ trait Accounting extends Logging {
 
   protected def withAccounting[T](p: => T)
       (implicit ctx: Context[_], obj: IObject): T = {
-    
+
     val start = System.currentTimeMillis
     try {
       p

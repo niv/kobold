@@ -16,10 +16,10 @@ class NCreature(w: NWObject) extends NObject(w) with ICreature {
   def whisper(message: String) = <= {
     NWScript.speakString(message, 1)
   }
-  
+
   def sees(other: ICreature): Boolean =
     NWScript.getObjectSeen(other, this)
-  
+
   private def nearObjects[T <: NObject](typeMask: Int, distance: Float): List[T] =
     NWScript.getObjectsInShape(
       4 /* SHAPE_SPHERE */,
@@ -43,7 +43,7 @@ class NCreature(w: NWObject) extends NObject(w) with ICreature {
 
   def taskList = taskManager.taskList.toArray
   // def taskCount = taskManager.taskCount
-  
+
   def clear = taskManager.clear
 
   def taskFollow(o: ICreature, d: Float): ITask = {

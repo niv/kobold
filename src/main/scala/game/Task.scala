@@ -12,16 +12,16 @@ trait TaskEvents {
 trait BaseTask extends ITask {
   private var _completed = false
   private var _cancelled = false
-  
+
   private val startedOn = System.currentTimeMillis
   //val stoppedOn: Option[Long]
 
   def isCompleted: Boolean = _completed
   def isCancelled: Boolean = _cancelled
   def isDead: Boolean = isCancelled || isCompleted
-  
+
   def runtime: Long = System.currentTimeMillis - startedOn
-  
+
   def tick
 
   def complete = if (!isDead) _completed = true
@@ -75,7 +75,7 @@ class TaskManager(private val parent: ICreature with ActionQueue) {
   private def schedule {
     if (current.isEmpty && q.size == 0)
       return
-    
+
     if (current.isDefined && current.get.isCompleted) {
       Host.onTaskCompleted(parent, current.get)
       current = None
@@ -85,7 +85,7 @@ class TaskManager(private val parent: ICreature with ActionQueue) {
       Host.onTaskCancelled(parent, current.get)
       current = None
     }
-    
+
     if (current.isEmpty && q.size > 0) {
       current = Some(q.dequeue)
       Host.onTaskStarted(parent, current.get)

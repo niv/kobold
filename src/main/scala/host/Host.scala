@@ -22,14 +22,20 @@ trait Host extends HostEvents {
   def handleObjectEvent(eventClass: String, va: List[Object])
     (implicit objSelf: IObject): Set[Context[_]]
 
-  /** Attaches the given context to the given host objects. */
-  def attachContext[EH](ctx: Context[EH], hosts: Set[IObject])
+  /** Attaches the given context to the given host objects.
+    * Returns the set of objects that were attached.
+    */
+  def attachContext[EH](ctx: Context[EH], hosts: Set[IObject]): Set[IObject]
 
-  /** Detaches the given Context from the given host objects. */
-  def detachContext[EH](ctx: Context[EH], hosts: Set[IObject])
+  /** Detaches the given Context from the given host objects.
+    * Returns the set of objects that were detached.
+    */
+  def detachContext[EH](ctx: Context[EH], hosts: Set[IObject]): Set[IObject]
 
-  /** Detaches the given context from all host objects. */
-  def detachContextFromAll[EH](ctx: Context[EH])
+  /** Detaches the given context from all host objects.
+    * Returns the set of objects that were detached.
+    */
+  def detachContextFromAll[EH](ctx: Context[EH]): Set[IObject]
 
   /** Returns a set of attached objects to the given context. */
   def attachedObjects[EH](ctx: Context[EH]): Set[IObject]
@@ -52,22 +58,27 @@ trait Host extends HostEvents {
 object Host extends Host with Logging with Accounting {
   private var attachMap: Map[Context[_], Set[IObject]] = Map()
 
-  def attachContext[EH](ctx: Context[EH], hosts: Set[IObject]) =
+  def attachContext[EH](ctx: Context[EH], hosts: Set[IObject]) = {
+    val existing = attachedObjects(ctx)
     if (hosts.size > 0) {
       log.debug("attaching to " + ctx + ": " + hosts)
       attachMap += ((ctx, hosts))
-    } else
-      detachContextFromAll(ctx)
+    }
+    existing -- hosts
+  }
 
-
-  def detachContext[EH](ctx: Context[EH], hosts: Set[IObject]) =
+  def detachContext[EH](ctx: Context[EH], hosts: Set[IObject]) = {
     attachMap.get(ctx) match {
       case Some(set) => attachContext(ctx, set -- hosts)
-      case None =>
+      case None => Set()
     }
-  def detachContextFromAll[EH](ctx: Context[EH]) {
+  }
+
+  def detachContextFromAll[EH](ctx: Context[EH]) = {
+    val existing = attachedObjects(ctx)
     log.debug("detaching " + ctx)
     attachMap -= (ctx)
+    existing
   }
   
   def attachedObjects[EH](ctx: Context[EH]): Set[IObject] =

@@ -16,6 +16,8 @@ trait Context[EH] extends IContext[EH]
 
   val uuid: UUID = UUID.randomUUID
 
+  Context.register(uuid, this)
+
   private var eventHandlers: Map[String, EventHandler[EH]] =
     Map()
 
@@ -42,4 +44,18 @@ trait Context[EH] extends IContext[EH]
       eventHandlers.keySet.mkString(";"),
       Host.attachedObjects(this).mkString(";")
     )
+}
+
+object Context {
+  import collection.mutable.{WeakHashMap => WHM}
+
+  private val mapUUID: WHM[String, Context[_]] =
+    new WHM()
+
+  private[host] def register(u: UUID, c: Context[_]) {
+    mapUUID(u.toString) = c
+  }
+
+  def byUUID(c: String) = mapUUID.get(c)
+  def byUUID(c: UUID) = mapUUID.get(c.toString)
 }

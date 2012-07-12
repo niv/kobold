@@ -11,17 +11,49 @@ import com.codahale.logula.Logging
 import org.apache.log4j.Level
 
 private [glue] object EventHandler extends SchedulerListener with Logging {
+  /** The namespace for game->kobold management calls. */
+  val InternalRegexp = """^kobold\.(.+)$""".r
+
   def postFlushQueues(remainingTokens: Int) {}
   def missedToken(objSelf: NWObject, token: String) {}
   def context(objSelf: NWObject) {}
 
-  private def e[X <: IObject](self: X)(event: String, va: Object*) =
-    Host.handleObjectEvent(event, va.toList)(self)
-  
-  case class E(e: String, o: NWObject)
+  private def kobold(fun: String, objSelf: IObject) {
+    val assocContext = NWScript.getLocalString(Module(), "_" + fun)
+
+    val ret = Context.byUUID(assocContext) match {
+      case Some(ctx) =>
+        fun match {
+          case "attachContext" =>
+            Host.attachContext(ctx, Set(objSelf)).size > 0
+          case "detachContext" =>
+            Host.detachContext(ctx, Set(objSelf)).size > 0
+          case "detachContextAll" =>
+            Host.detachContextFromAll(ctx)
+            true
+          case _ => false
+        }
+
+      case None =>
+        log.warn("game -> " + fun + " failed due to invalid context " +
+          assocContext)
+        false
+    }
+
+    NWScript.setLocalString(Module(), "_" + fun, if (ret) "1" else "0")
+  }
 
   def event(objSelf: NWObject, event: String) {
+    case class E(e: String, o: NWObject)
+
+    def e[X <: IObject](self: X)(event: String, va: Object*) =
+      Host.handleObjectEvent(event, va.toList)(self)
+
     val ctx: Set[Context[_]] = E(event, objSelf) match {
+      case E(InternalRegexp(a), o: IObject) =>
+        kobold(a, o)
+        Set()
+
       case E("creature_spawn", o: ICreature) =>
         e(o)("creature.spawn")
       

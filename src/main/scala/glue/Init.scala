@@ -52,9 +52,8 @@ private [glue] object Init extends Logging {
       case scr :: tail =>
         log.info("Script " + scr + " attachedTo " + tail)
         val oids = tail map (_.toInt)
-        val src = io.Source.fromFile(scr).mkString
-        val script =  rhino.prepare(src)
-        rhino.execute(null, script)
+        val script =  rhino.prepare(new java.io.FileInputStream(scr))
+        //rhino.execute(null, script)
         Host attachContext (script, oids.map { oid =>
           new NCreature(new NWObject(oid)) }.toSet)
 

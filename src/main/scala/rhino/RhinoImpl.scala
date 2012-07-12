@@ -43,8 +43,8 @@ class RhinoImpl extends Language[Function,RhinoContext] with Logging {
   classShutter.addAllowedStartsWith("es.elv.kobold.game.")
   classShutter.addAllowedStartsWith("es.elv.kobold.lang.rhino.")
 
-  private def withContext[T](o: IObject, ctx: RhinoContext)
-      (c: (JSCtx) => T): T = try {
+  private def withContext[T](c: (JSCtx) => T)
+      (implicit ctx: RhinoContext): T = try {
 
     val quota = ctx.quotaSingle
     val jsctx = ContextFactory.getGlobal.enterContext
@@ -58,23 +58,22 @@ class RhinoImpl extends Language[Function,RhinoContext] with Logging {
 
   } finally JSCtx.exit
 
-  def prepare(source: String): RhinoContext = try {
+  def prepare(source: java.io.InputStream): RhinoContext = try {
+    val src = io.Source.fromInputStream(source).mkString("")
     val ctx = JSCtx.enter()
     val scope = SecureScriptRuntime.initSecureStandardObjects(ctx, null, true)
-    val s = ctx.compileString(source, "", 0, null)
+    val s = ctx.compileString(src, "", 0, null)
 
-    new RhinoContext(this, scope, s)
-  } finally JSCtx.exit()
-
-  def execute(obj: IObject, ctx: RhinoContext) =
-    withContext(obj, ctx) { c =>
-      ctx.compiled.exec(c, ctx.scope)
+    implicit val rctx = new RhinoContext(this, scope, s)
+    withContext { jsctx =>
+      s.exec(jsctx, scope)
     }
-
+    rctx
+  } finally JSCtx.exit()
 
   def executeEventHandler(obj: IObject, eh: EventHandler[Function],
       va: List[Object])(implicit ctx: RhinoContext) =
-    withContext(obj, ctx) { jsctx =>
+    withContext { jsctx =>
       val thisObj = jsctx.getWrapFactory().wrapAsJavaObject(jsctx, ctx.scope,
           obj, obj.getClass)
 

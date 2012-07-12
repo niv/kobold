@@ -30,7 +30,6 @@ private [kobold] trait IContextStore {
     */
   def delete(key: String): String
 
-
   /** Clears out the storage and deletes all content. */
   def clear
 }
@@ -40,4 +39,7 @@ trait IContext[HANDLER] extends IContextStore {
 
   /** Register a new event handler for this context. */
   def on(eventClass: String, handler: HANDLER)
+
+  /** Write something to the log of this context. */
+  def log(message: String)
 }

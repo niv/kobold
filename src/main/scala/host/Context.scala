@@ -4,6 +4,7 @@ import org.nwnx.nwnx2.jvm.NWObject
 import es.elv.kobold.api._
 import es.elv.kobold.game._
 import java.util.UUID
+import com.codahale.logula.Log
 
 /** A Context contains a complete, verified script environment
   * that can handle events, and is bound to a specific Language.
@@ -44,6 +45,12 @@ trait Context[EH] extends IContext[EH]
       eventHandlers.keySet.mkString(";"),
       Host.attachedObjects(this).mkString(";")
     )
+
+  // TODO: move this to a log store accessible by users/scripts
+  private lazy val _log = Log.forClass(this.getClass)
+  def log(message: String) {
+    _log.info(message)
+  }
 }
 
 object Context {

@@ -12,11 +12,6 @@ trait IBase {
 	  */
   def isValid: Boolean
 	
-
-  /** Write something to the script log. */
-  def log(message: String) {}
-
-
 	/** Will return true if the currently-running script has
 	  * full access to this object. Accessing any object that
 	  * the running script has no access to will result in a

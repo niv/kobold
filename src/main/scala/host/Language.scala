@@ -16,6 +16,7 @@ trait Language[EH, CTX <: Context[EH]] {
 
   /** Execute the given eventhandler on a context.
     * Returns whatever the EH gave back. */
-  private [host] def executeEventHandler(obj: IObject, script: CTX,
-      eventHandler: EventHandler[EH], va: List[Object]): Any
+  private [host] def executeEventHandler(obj: IObject,
+      eventHandler: EventHandler[EH], va: List[Object])
+      (implicit ctx: CTX): Any
 }

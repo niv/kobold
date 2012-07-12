@@ -34,16 +34,14 @@ trait Context[EH] extends IContext[EH]
       eventClass: String, va: List[Object]): Option[Any] =
     eventHandlerFor(eventClass) match {
       case Some(eh) =>
-        Some(language.executeEventHandler(obj, this, eh, va))
+        Some(language.executeEventHandler(obj, eh, va)(this))
       case None => None
     }
 
   final override def toString: String =
-    "%s[%s,%s,%s]".format(
+    "%s[%s]".format(
       this.getClass.getName.split("\\.").last,
-      uuid.toString,
-      eventHandlers.keySet.mkString(";"),
-      Host.attachedObjects(this).mkString(";")
+      uuid.toString
     )
 
   // TODO: move this to a log store accessible by users/scripts

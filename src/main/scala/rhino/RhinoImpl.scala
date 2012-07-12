@@ -26,7 +26,7 @@ class RhinoImpl extends Language[Function,RhinoContext] with Logging {
     new DefaultSecureWrapFactory()
   wrapFactory.addAllowedNatives(
       // Script Context and Helpers
-      classOf[IContext[_]],
+      classOf[IContext[_]], classOf[IContextStore], classOf[IContextAccounting],
       classOf[ISystem],
 
       // Game object interfaces
@@ -46,7 +46,7 @@ class RhinoImpl extends Language[Function,RhinoContext] with Logging {
   classShutter.addAllowedStartsWith("es.elv.kobold.lang.rhino.")
 
   private def getContext(host: IObject, ctx: RhinoContext): JSCtx = {
-    val jsctx = cf.enterContext(ctx.remainingRuntime)
+    val jsctx = cf.enterContext(ctx.quotaSingle)
     jsctx.setWrapFactory(wrapFactory)
     jsctx.setClassShutter(classShutter)
 

@@ -7,40 +7,42 @@ import es.elv.kobold._
 
 import org.nwnx.nwnx2.jvm.{Scheduler, NWScript, NWObject, NWLocation, NWVector}
 
-trait ContextAccounting {
-  this: Context[_] =>
+private [host] trait ContextAccounting extends IContextAccounting {
+  def lastActiveAt = _lastActiveAt
+  private [host] var _lastActiveAt: Long = System.currentTimeMillis
 
-  /** The total time (in ms) this context has taken since creation. */
-  var totalRuntime: Long = 0
+  def totalRuntime = _totalRuntime
+  private [host] var _totalRuntime: Long = 0
 
-  /** The time (in ms) this context has taken for this slice. */
-  var thisSliceRuntime: Long = 0
-
-  /** The maximum execution time for a single EventHandler. */
-  val limitRuntime: Long = 25
-
-  /** The remaining runtime (in ms) for this Context.
-    * For now, we're hard-limiting each event to a fixed value.
-    * Can be adjusted to a sliding window later on.
-    */
-  def remainingRuntime = limitRuntime
+  def quota = _quota
+  private [host] var _quota: Long = 150
 }
 
 trait Accounting extends Logging {
   this: Host =>
 
   protected def withAccounting[T](p: => T)
-      (implicit ctx: Context[_], obj: IObject): T = {
+      (implicit ctx: ContextAccounting, obj: IObject): T = {
+
+    // The number of ms gained since the last time.
+    val msGained = (System.currentTimeMillis - ctx._lastActiveAt) / 1000
+        ctx.msPerSecond
+
+    ctx._lastActiveAt = System.currentTimeMillis
+
+    ctx._quota += msGained
+    if (ctx.quota > ctx.maxQuota) ctx._quota = ctx.maxQuota
 
     val start = System.currentTimeMillis
     try {
       p
     } finally {
-      val end = System.currentTimeMillis
-      ctx.totalRuntime += (end - start)
-      log.debug("%s took %d ms (total %d ms)".format(
-        ctx.toString,
-        end - start,
+      val diffms = System.currentTimeMillis - start
+      ctx._quota -= diffms
+      ctx._totalRuntime += diffms
+
+      log.debug("%s quota: %d -%d +%d (total: %d)".format(
+        ctx.toString, ctx.quota, diffms, msGained,
         ctx.totalRuntime
       ))
     }

@@ -34,7 +34,7 @@ private [kobold] trait IContextStore {
   def clear
 }
 
-trait IContext[HANDLER] extends IContextStore {
+trait IContext[HANDLER] extends IContextStore with IContextAccounting {
   val uuid: UUID
 
   /** Register a new event handler for this context. */

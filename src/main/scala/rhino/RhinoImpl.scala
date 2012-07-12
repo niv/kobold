@@ -13,7 +13,6 @@ import es.elv.kobold.api._
 import es.elv.kobold.host.Language
 import es.elv.kobold.host.EventHandler
 import es.elv.kobold.host.Accounting
-import es.elv.kobold.game.System
 
 import com.codahale.logula.Logging
 
@@ -25,7 +24,6 @@ class RhinoImpl extends Language[Function,RhinoContext] with Logging {
   wrapFactory.addAllowedNatives(
       // Script Context and Helpers
       classOf[IContext[_]], classOf[IContextStore], classOf[IContextAccounting],
-      classOf[ISystem],
 
       // Game object interfaces
       classOf[IBase], classOf[IObject], classOf[IUnknown],

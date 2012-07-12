@@ -42,4 +42,9 @@ trait IContext[HANDLER] extends IContextStore with IContextAccounting {
 
   /** Write something to the log of this context. */
   def log(message: String)
+
+  /** Returns the current serverside unix time, with milliseconds.
+    * Works just like System.currentTimeMillis() in Java.
+    */
+  def currentTimeMillis: Long
 }

@@ -19,6 +19,8 @@ trait Context[EH] extends IContext[EH]
 
   Context.register(uuid, this)
 
+  def currentTimeMillis = System.currentTimeMillis
+
   private var eventHandlers: Map[String, EventHandler[EH]] =
     Map()
 

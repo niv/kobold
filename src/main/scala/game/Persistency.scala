@@ -7,6 +7,8 @@ import es.elv.kobold.api.IContextStore
 import com.codahale.logula.Logging
 import org.apache.commons.configuration._
 
+import concurrent.ops.spawn
+
 trait Persistency[H] extends Logging {
   this: IContext[H] =>
 
@@ -45,15 +47,15 @@ trait ApacheCommonsPersistency[H] extends Persistency[H] {
   protected class CommonsStore(cfg: PropertiesConfiguration)
       extends IContextStore {
     def set(key: String, value: String) =
-      cfg.setProperty(key, value)
+      spawn { cfg.setProperty(key, value) }
     def get(key: String): String =
       cfg.getString(key)
     def delete(key: String): String = {
       val i = cfg.getString(key)
-      cfg.clearProperty(key)
+      spawn { cfg.clearProperty(key) }
       i
     }
-    def clear = cfg.clear
+    def clear = spawn { cfg.clear }
   }
 
   private lazy val store = new CommonsStore(config)

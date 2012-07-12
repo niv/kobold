@@ -11,49 +11,53 @@ import scala.actors.Future
 class QuotaExceededException extends RuntimeException
 
 private [host] trait ContextAccounting extends IContextAccounting {
-  def lastActiveAt = _lastActiveAt
-  private [host] var _lastActiveAt: Long = System.currentTimeMillis
+  private [host] var _lastActiveAt: Long = System.nanoTime
 
   def totalRuntime = _totalRuntime
   private [host] var _totalRuntime: Long = 0
 
   def quota = _quota
-  private [host] var _quota: Long = 150
+  private [host] var _quota: Long = maxQuota
 }
 
 object Accounting extends Logging {
 
   def enforceQuota[T](p: => T)
+      (implicit ctx: ContextAccounting): T =
+    withQuota(true, p)(ctx)
+
+  def withQuota[T](enforce: Boolean = false, p: => T)
       (implicit ctx: ContextAccounting): T = {
 
-    // The number of ms gained since the last time.
-    val msGained = (System.currentTimeMillis - ctx._lastActiveAt) / 1000
-        ctx.msPerSecond
+    val nsLapsed = System.nanoTime - ctx._lastActiveAt
+    ctx._lastActiveAt = System.nanoTime
+    val usLapsed = nsLapsed / 1000
+    val usGained = (usLapsed * ctx.msPerSecond) / 1000
 
-    ctx._lastActiveAt = System.currentTimeMillis
-
-    ctx._quota += msGained
+    ctx._quota += usGained
     if (ctx.quota > ctx.maxQuota) ctx._quota = ctx.maxQuota
 
     // No point in hitting the VM if there isn't any quota to run in.
-    if (ctx.quota < 1)
+    if (ctx.quotaEnabled && enforce && ctx.quota <= 100)
       throw new QuotaExceededException
 
-    val start = System.currentTimeMillis
+    val start = System.nanoTime
     try {
 
-      awaitAll(ctx.quota, future { p }).
-        head.asInstanceOf[Option[T]].
-        getOrElse(throw new QuotaExceededException)
+      if (ctx.quotaEnabled && enforce)
+        awaitAll(1 + ctx.quota / 1000, future { p }).
+          head.asInstanceOf[Option[T]].
+          getOrElse(throw new QuotaExceededException)
+      else
+        p
 
     } finally {
-      val diffms = System.currentTimeMillis - start
-      ctx._quota -= diffms
-      ctx._totalRuntime += diffms
+      val diffus = (System.nanoTime - start) / 1000
+      ctx._quota -= diffus
+      ctx._totalRuntime += diffus
 
-      log.debug("%s quota: %d -%d +%d (total: %d)".format(
-        ctx.toString, ctx.quota, diffms, msGained,
-        ctx.totalRuntime
+      log.debug("%s -%d us +%d us (q: %d ms)".format(
+        ctx.toString, diffus, usGained, ctx.quota / 1000
       ))
     }
   }

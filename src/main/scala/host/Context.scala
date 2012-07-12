@@ -56,13 +56,16 @@ trait Context[EH] extends IContext[EH]
 object Context {
   import collection.mutable.{WeakHashMap => WHM}
 
-  private val mapUUID: WHM[String, Context[_]] =
+  private val mapUUID: WHM[Context[_], String] =
     new WHM()
 
   private[host] def register(u: UUID, c: Context[_]) {
-    mapUUID(u.toString) = c
+    mapUUID(c) = u.toString
   }
 
-  def byUUID(c: String) = mapUUID.get(c)
-  def byUUID(c: UUID) = mapUUID.get(c.toString)
+  def byUUID(c: String): Option[Context[_]] =
+    mapUUID filter (_._2 == c) map (_._1) headOption
+
+  def byUUID(c: UUID): Option[Context[_]] =
+    byUUID(c.toString)
 }

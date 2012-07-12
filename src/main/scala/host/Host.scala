@@ -10,8 +10,6 @@ import es.elv.kobold.game._
 import org.nwnx.nwnx2.jvm.{Scheduler, NWScript, NWObject, NWLocation, NWVector}
 import org.nwnx.nwnx2.jvm.constants.ObjectType
 
-import org.mozilla.javascript.ScriptTimeoutError
-
 /** The Host manages registered languages and distributes events
   * to EventListeners.
   */
@@ -55,7 +53,7 @@ trait Host extends HostEvents {
     (implicit target: IObject with ActionQueue)
 }
 
-object Host extends Host with Logging with Accounting {
+object Host extends Host with Logging {
   private var attachMap: Map[Context[_], Set[IObject]] = Map()
 
   def attachContext[EH](ctx: Context[EH], hosts: Set[IObject]) = {
@@ -126,26 +124,31 @@ object Host extends Host with Logging with Accounting {
 
     log.debug(eventClass + " -> "  + objSelf + ": " + va)
 
+    def inner(ctx: Context[_]): Boolean = try {
+      ctx.executeEventHandler(objSelf,
+        eventClass, convertToAPI(va)) match {
+          case Some(_) => true
+          case None => false
+        }
+    } catch {
+      case any =>
+        throw any
+    }
+
     attachedTo(objSelf) filter { implicit ctx =>
       withContext {
-        withAccounting { try {
-          ctx.executeEventHandler(objSelf,
-              eventClass, convertToAPI(va)) match {
-            case Some(_) => true
-            case None => false
-          }
+        try {
+          inner(ctx)
         } catch {
-          case tmi: ScriptTimeoutError =>
-            log.error(tmi, "TMI in " + eventClass + " of " + ctx)
+          case quota: QuotaExceededException =>
+            log.error(quota,
+              "Runtime quota exceeded in " + eventClass + " of " + ctx)
             detachContextFromAll(ctx)
             false
-          case other =>
-            log.error(other, "ERROR in " + eventClass + " of " + ctx)
-            detachContextFromAll(ctx)
-            false
-        } }
+        }
       }
     }
+
   }
 
   def message(source: IObject, message: Object)

@@ -5,7 +5,10 @@ import com.codahale.logula.Logging
 import es.elv.kobold.api._
 import es.elv.kobold._
 
-import org.nwnx.nwnx2.jvm.{Scheduler, NWScript, NWObject, NWLocation, NWVector}
+import scala.actors.Futures._
+import scala.actors.Future
+
+class QuotaExceededException extends RuntimeException
 
 private [host] trait ContextAccounting extends IContextAccounting {
   def lastActiveAt = _lastActiveAt
@@ -18,11 +21,10 @@ private [host] trait ContextAccounting extends IContextAccounting {
   private [host] var _quota: Long = 150
 }
 
-trait Accounting extends Logging {
-  this: Host =>
+object Accounting extends Logging {
 
-  protected def withAccounting[T](p: => T)
-      (implicit ctx: ContextAccounting, obj: IObject): T = {
+  def enforceQuota[T](p: => T)
+      (implicit ctx: ContextAccounting): T = {
 
     // The number of ms gained since the last time.
     val msGained = (System.currentTimeMillis - ctx._lastActiveAt) / 1000
@@ -33,9 +35,17 @@ trait Accounting extends Logging {
     ctx._quota += msGained
     if (ctx.quota > ctx.maxQuota) ctx._quota = ctx.maxQuota
 
+    // No point in hitting the VM if there isn't any quota to run in.
+    if (ctx.quota < 1)
+      throw new QuotaExceededException
+
     val start = System.currentTimeMillis
     try {
-      p
+
+      awaitAll(ctx.quota, future { p }).
+        head.asInstanceOf[Option[T]].
+        getOrElse(throw new QuotaExceededException)
+
     } finally {
       val diffms = System.currentTimeMillis - start
       ctx._quota -= diffms

@@ -1,27 +1,24 @@
 package es.elv.kobold.lang.rhino
 
-import org.mozilla.javascript.{Context => JSCtx}
-import org.mozilla.javascript.DefaultSecureWrapFactory
+// overriding local versions with tweaks.
+import org.mozilla.javascript.{DefaultSecureWrapFactory,
+  SecureClassShutter, SecureScriptRuntime}
+
+import org.mozilla.javascript.{Context => JSCtx, ContextFactory}
 import org.mozilla.javascript.Function
 import org.mozilla.javascript.Script
 import org.mozilla.javascript.Scriptable
-import org.mozilla.javascript.SecureClassShutter
-import org.mozilla.javascript.SecureScriptRuntime
-import org.mozilla.javascript.ScriptTimeoutError
-import org.mozilla.javascript.TimingContextFactory
 
 import es.elv.kobold.api._
 import es.elv.kobold.host.Language
 import es.elv.kobold.host.EventHandler
+import es.elv.kobold.host.Accounting
 import es.elv.kobold.game.System
 
 import com.codahale.logula.Logging
 
 class RhinoImpl extends Language[Function,RhinoContext] with Logging {
   val name = "js/rhino"
-
-  private val cf: TimingContextFactory =
-    new TimingContextFactory()
 
   private val wrapFactory: DefaultSecureWrapFactory =
     new DefaultSecureWrapFactory()
@@ -50,13 +47,12 @@ class RhinoImpl extends Language[Function,RhinoContext] with Logging {
       (c: (JSCtx) => T): T = try {
 
     val quota = ctx.quotaSingle
-    val jsctx = cf.enterContext(quota)
+    val jsctx = ContextFactory.getGlobal.enterContext
 
     jsctx.setWrapFactory(wrapFactory)
     jsctx.setClassShutter(classShutter)
 
     ctx.scope.put("ctx", ctx.scope, ctx)
-    ctx.scope.put("system", ctx.scope, System)
 
     c(jsctx)
 
@@ -84,7 +80,10 @@ class RhinoImpl extends Language[Function,RhinoContext] with Logging {
 
       val va2 = va map { JSCtx.javaToJS(_, ctx.scope) } toArray
 
-      eh.getHandler.call(jsctx, ctx.scope, thisObj, va2)
+      implicit val ictx = ctx
+      Accounting.enforceQuota {
+        eh.getHandler.call(jsctx, ctx.scope, thisObj, va2)
+      }
     }
 
 }

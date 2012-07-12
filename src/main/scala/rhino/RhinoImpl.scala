@@ -25,14 +25,18 @@ class RhinoImpl extends Language[Function,RhinoContext] with Logging {
   private val wrapFactory: DefaultSecureWrapFactory =
 		new DefaultSecureWrapFactory()
   wrapFactory.addAllowedNatives(
+      // Script Context and Helpers
+      classOf[IContext[_]],
+      classOf[ISystem],
+
+      // Game object interfaces
       classOf[IBase], classOf[IObject], classOf[IUnknown],
       classOf[ICreature],
       classOf[IArea], //Item.class, IModule.class, IPlaceable.class,
-      classOf[IPersistency], classOf[ILocation],
-      classOf[IVector2], classOf[IVector3],
-      classOf[ITask],
-      //ISystem.class,
-      classOf[IScriptEventRegistry[_]]
+      classOf[ILocation], classOf[IVector2], classOf[IVector3],
+
+      // Tasking
+      classOf[ITask]
   )
 	
   private val classShutter: SecureClassShutter =
@@ -45,11 +49,10 @@ class RhinoImpl extends Language[Function,RhinoContext] with Logging {
     val jsctx = cf.enterContext(ctx.remainingRuntime)
     jsctx.setWrapFactory(wrapFactory)
 		jsctx.setClassShutter(classShutter)
-		
+
 		//script.getScope().put("MODULE", script.getScope(), new NModule())
 		ctx.scope.put("host", ctx.scope, JSCtx.javaToJS(host, ctx.scope))
-		ctx.scope.put("script", ctx.scope, new ScriptEventRegistryImpl(ctx))
-
+    ctx.scope.put("ctx", ctx.scope, ctx)
     jsctx
 	}
 

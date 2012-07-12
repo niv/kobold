@@ -40,6 +40,9 @@ trait Host extends HostEvents {
   /** Returns the current objectSelf, or None if no script is running. */
   def currentObjectSelf: Option[IBase]
 
+  /** Returns the current context, or None if no script is running. */
+  def currentContext: Option[Context[_]]
+
   /** Sends a inter-object message.
     */
   def message(source: IObject, message: Object)
@@ -91,13 +94,18 @@ object Host extends Host with Logging with Accounting {
   }
 
   private var _currentObjectSelf: Option[IBase] = None
+  private var _currentContext: Option[Context[_]] = None
   def currentObjectSelf = _currentObjectSelf
-  private def withContext[A](c: => A)(implicit objSelf: IObject): A =
+  def currentContext = _currentContext
+  private def withContext[A](c: => A)
+      (implicit objSelf: IObject, ctx: Context[_]): A =
     try {
       require(currentObjectSelf.isEmpty)
       _currentObjectSelf = Some(objSelf)
+      _currentContext = Some(ctx)
       c
     } finally {
+      _currentContext = None
       _currentObjectSelf = None
     }
 
@@ -107,8 +115,8 @@ object Host extends Host with Logging with Accounting {
 
     log.debug(eventClass + " -> "  + objSelf + ": " + va)
 
-    withContext {
-      attachedTo(objSelf) filter { implicit ctx =>
+    attachedTo(objSelf) filter { implicit ctx =>
+      withContext {
         withAccounting { try {
           ctx.executeEventHandler(objSelf,
               eventClass, convertToAPI(va)) match {
@@ -120,12 +128,11 @@ object Host extends Host with Logging with Accounting {
             log.error(tmi, "TMI in " + eventClass + " of " + ctx)
             detachContextFromAll(ctx)
             false
-
           case other =>
             log.error(other, "ERROR in " + eventClass + " of " + ctx)
             detachContextFromAll(ctx)
             false
-         } }
+        } }
       }
     }
   }

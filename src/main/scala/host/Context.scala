@@ -33,7 +33,7 @@ trait Context[EH] extends IContext[EH]
   /** Executes the given Event on this context. Returns whatever
     * the EH gave back, or None if no handler was ran. */
   def executeEventHandler(obj: IObject,
-      eventClass: String, va: List[Object]): Option[Any] =
+      eventClass: String, va: List[Any]): Option[Any] =
     eventHandlerFor(eventClass) match {
       case Some(eh) =>
         Some(language.executeEventHandler(obj, eh.getHandler, va)(this))

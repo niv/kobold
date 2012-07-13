@@ -15,7 +15,7 @@ trait Language[EH, CTX <: Context[EH], ENV] {
   /** Execute the given eventhandler on a context.
     * Returns whatever the EH gave back. */
   def executeEventHandler(obj: IObject, eventHandler: EH,
-    va: List[Object])(implicit ctx: CTX): Any
+    va: List[Any])(implicit ctx: CTX): Any
 
   /** Runs the given code block within the language environment.
     * Will provide all the neccessary setup and teardown transparently

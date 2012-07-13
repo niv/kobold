@@ -17,7 +17,7 @@ trait Host extends HostEvents {
   /** Handle the given event in all registered Contexts.
     * Returns the set of contexts that ran the handler.
     */
-  def handleObjectEvent(eventClass: String, va: List[Object])
+  def handleObjectEvent(eventClass: String, va: List[Any])
     (implicit objSelf: IObject): Set[Context[_]]
 
   /** Attaches the given context to the given host objects.
@@ -88,7 +88,7 @@ object Host extends Host with Logging {
   private def attachedTo(o: IObject): Set[Context[_]] =
     attachMap filter ((s) => s._2 contains o) keySet
 
-  private def convertToAPI(va: List[Object]): List[Object] = {
+  private def convertToAPI(va: List[Any]): List[Any] = {
     va map { e =>
       e match {
         case b: IBase => b
@@ -119,7 +119,7 @@ object Host extends Host with Logging {
     }
 
 
-  def handleObjectEvent(eventClass: String, va: List[Object])
+  def handleObjectEvent(eventClass: String, va: List[Any])
     (implicit objSelf: IObject): Set[Context[_]] = {
 
     log.debug(eventClass + " -> "  + objSelf + ": " + va)

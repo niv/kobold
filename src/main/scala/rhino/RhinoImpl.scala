@@ -87,7 +87,7 @@ class RhinoImpl extends Language[Function,RhinoContext,JSCtx] with Logging {
   */
 
   def executeEventHandler(obj: IObject, eh: Function,
-      va: List[Object])(implicit ctx: RhinoContext) =
+      va: List[Any])(implicit ctx: RhinoContext) =
     inLanguage { jsctx =>
       val thisObj = jsctx.getWrapFactory().wrapAsJavaObject(jsctx, ctx.scope,
           obj, obj.getClass)

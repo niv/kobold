@@ -23,7 +23,8 @@ class RhinoImpl extends Language[Function,RhinoContext,JSCtx] with Logging {
     new DefaultSecureWrapFactory()
   wrapFactory.addAllowedNatives(
       // Script Context and Helpers
-      classOf[IContext[_]], classOf[IContextStore], classOf[IContextAccounting],
+      classOf[IContext[_]], classOf[IConcurrency[_]],
+      classOf[IContextStore], classOf[IContextAccounting],
 
       // Game object interfaces
       classOf[IBase], classOf[IObject], classOf[IUnknown],
@@ -94,7 +95,7 @@ class RhinoImpl extends Language[Function,RhinoContext,JSCtx] with Logging {
 
       Accounting.enforceQuota {
         eh.call(jsctx, ctx.scope, thisObj, va2)
-      }
+      }(ctx, this)
     }
 
 }

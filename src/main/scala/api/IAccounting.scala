@@ -5,8 +5,8 @@ import es.elv.kobold._
 trait IContextAccounting {
   val quotaEnabled: Boolean = true
 
-  /** This context gains this many us of execution time quota
-    * per second.
+  /** This context gains this many milliseconds of execution time quota
+    * per realtime second.
     * This is an experimental value and will need tweaking,
     * based on the number of active scripts and other server load.
     * The upper ceiling is about half a second of total time per

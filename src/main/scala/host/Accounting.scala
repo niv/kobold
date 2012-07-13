@@ -22,12 +22,12 @@ private [host] trait ContextAccounting extends IContextAccounting {
 
 object Accounting extends Logging {
 
-  def enforceQuota[T](p: => T)
-      (implicit ctx: ContextAccounting): T =
-    withQuota(true, p)(ctx)
+  def enforceQuota[EH,ENV,CTX<:Context[EH],T](p: => T)
+      (implicit ctx: CTX, lang: Language[EH,CTX,ENV]): T =
+    withQuota(true, p)(ctx,lang)
 
-  def withQuota[T](enforce: Boolean = false, p: => T)
-      (implicit ctx: ContextAccounting): T = {
+  def withQuota[EH,ENV,CTX<:Context[EH],T](enforce: Boolean = false, p: => T)
+      (implicit ctx: CTX, lang: Language[EH,CTX,ENV]): T = {
 
     val nsLapsed = System.nanoTime - ctx._lastActiveAt
     ctx._lastActiveAt = System.nanoTime
@@ -38,17 +38,20 @@ object Accounting extends Logging {
     if (ctx.quota > ctx.maxQuota) ctx._quota = ctx.maxQuota
 
     // No point in hitting the VM if there isn't any quota to run in.
-    if (ctx.quotaEnabled && enforce && ctx.quota <= 100)
+    if (ctx.quotaEnabled && enforce && ctx.quota <= 1000)
       throw new QuotaExceededException
 
     val start = System.nanoTime
     try {
 
-      if (ctx.quotaEnabled && enforce)
-        awaitAll(1 + ctx.quota / 1000, future { p }).
+      if (ctx.quotaEnabled && enforce) {
+        val fu = future { lang.inLanguage(_ => p) }
+
+        awaitAll(1 + ctx.quota / 1000, fu).
           head.asInstanceOf[Option[T]].
           getOrElse(throw new QuotaExceededException)
-      else
+
+      } else
         p
 
     } finally {

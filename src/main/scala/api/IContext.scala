@@ -24,17 +24,19 @@ private [kobold] trait IContextStore {
     * If persistent storage is not available, a StorageException will
     * be thrown.
     */
-  def get(key: String): String
+  def get(key: String): Any
 
   /** Deletes the given variable, returning it's value.
     */
-  def delete(key: String): String
+  def delete(key: String): Any
 
   /** Clears out the storage and deletes all content. */
   def clear
 }
 
-trait IContext[HANDLER] extends IContextStore with IContextAccounting {
+trait IContext[HANDLER] extends IConcurrency[HANDLER]
+    with IContextStore
+    with IContextAccounting {
   val uuid: UUID
 
   /** Register a new event handler for this context. */

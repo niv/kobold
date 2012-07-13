@@ -2,7 +2,7 @@ package es.elv.kobold.lang.rhino
 
 // overriding local versions with tweaks.
 import org.mozilla.javascript.{SecureClassShutter,
-  SecureScriptRuntime, DefaultSecureWrapFactory, WrapFactory}
+  SecureScriptRuntime, WrapFactory, SecureWrapFactory}
 
 import org.mozilla.javascript.{Context => JSCtx, ContextFactory, ContextAction}
 import org.mozilla.javascript.Function
@@ -19,8 +19,9 @@ import com.codahale.logula.Logging
 class RhinoImpl extends Language[Function,RhinoContext,JSCtx] with Logging {
   val name = "js/rhino"
 
- private val wrapFactory: DefaultSecureWrapFactory =
-    new DefaultSecureWrapFactory()
+ private val wrapFactory: WrapFactory with SecureWrapFactory =
+    new ScalaSecureWrapFactory()
+
   wrapFactory.addAllowedNatives(
       // Script Context and Helpers
       classOf[IContext[_]], classOf[IConcurrency[_]],

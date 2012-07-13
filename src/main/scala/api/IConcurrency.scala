@@ -5,5 +5,5 @@ trait IConcurrency[HANDLER] {
     * run in separate threads. Will return when BOTH handlers have
     * finished. Will count only once against quota.
     */
-  def par(a: HANDLER, b: HANDLER): Array[Any]
+  def par(a: HANDLER, b: HANDLER): (Any, Any)
 }

@@ -31,9 +31,9 @@ class RhinoContext(
         throw new IllegalStateException("Not in context")
     }
 
-  def par(a: Function, b: Function): Array[Any] =
+  def par(a: Function, b: Function): (Any, Any) =
     concurrent.ops.par(
       callWithCurrent(a),
       callWithCurrent(b)
-    ).productIterator.toArray
+    )
 }

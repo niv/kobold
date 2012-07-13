@@ -33,7 +33,7 @@ class NCreature(w: NWObject) extends NObject(w) with ICreature {
 
   def getPerceivedCreatures(distance: Float) =
     nearObjects[NCreature](1 /*OBJECT_TYPE_CREATURE*/, distance).
-      filter(sees(_)) toArray
+      filter(sees(_))
 
   def location = NWScript.getLocation(this)
 
@@ -41,7 +41,7 @@ class NCreature(w: NWObject) extends NObject(w) with ICreature {
 
   def busy = taskManager.taskList.size > 0
 
-  def taskList = taskManager.taskList.toArray
+  def taskList = taskManager.taskList
   // def taskCount = taskManager.taskCount
 
   def clear = taskManager.clear

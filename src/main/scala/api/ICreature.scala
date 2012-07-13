@@ -19,7 +19,7 @@ trait ICreature extends IObject {
   /** Return the task list of this Creature. May be empty.
     * The active task is at the head of the list.
     */
-  def taskList: Array[ITask]
+  def taskList: List[ITask]
 
   /** Return true if this Creature is a player character.
     */
@@ -42,7 +42,7 @@ trait ICreature extends IObject {
     *
     * Distance: the distance in meters. Limited to 0-30.
     */
-  def getPerceivedCreatures(distance: Float): Array[ICreature]
+  def getPerceivedCreatures(distance: Float): List[ICreature]
 
   /** Returns the location of this Creature.
     */

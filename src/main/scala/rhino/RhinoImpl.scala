@@ -44,7 +44,6 @@ class RhinoImpl extends Language[Function,RhinoContext] with Logging {
   private def withContext[T](c: (JSCtx) => T)
       (implicit ctx: RhinoContext): T = try {
 
-    val quota = ctx.quotaSingle
     val jsctx = ContextFactory.getGlobal.enterContext
 
     jsctx.setWrapFactory(wrapFactory)
@@ -57,12 +56,16 @@ class RhinoImpl extends Language[Function,RhinoContext] with Logging {
   } finally JSCtx.exit
 
   def prepare(source: java.io.InputStream): RhinoContext = try {
-    val src = io.Source.fromInputStream(source).mkString("")
-    val ctx = JSCtx.enter()
-    val scope = SecureScriptRuntime.initSecureStandardObjects(ctx, null, true)
-    val s = ctx.compileString(src, "", 0, null)
+    val ctx = JSCtx.enter
+    ctx.setLanguageVersion(JSCtx.VERSION_1_7)
+    ctx.setOptimizationLevel(9)
 
+    val scope = SecureScriptRuntime.initSecureStandardObjects(ctx, null, true)
+    val s = ctx.compileReader(new java.io.InputStreamReader(source),
+      "", 0, null)
     implicit val rctx = new RhinoContext(this, scope, s)
+
+    println(ctx.getLanguageVersion)
     withContext { jsctx =>
       s.exec(jsctx, scope)
     }

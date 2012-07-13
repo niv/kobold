@@ -17,16 +17,28 @@ import scala.collection.JavaConverters._
 import java.io.File
 
 private [glue] object Init extends Logging {
+  if (System.getSecurityManager == null &&
+      System.getProperty("kobold.pleasePwnMe") == null)
+    throw new Error("It is STRONGLY recommended to use a security manager! " +
+      "If you are SURE you want to run without one, supply -Dkobold.pleasePwnMe")
+
   Logging.configure { log =>
+    log.registerWithJMX = false
     log.level = Level.DEBUG
     log.console.enabled = true
     log.console.threshold = Level.DEBUG
     log.loggers("es.elv.kobold.G") = Level.WARN
   }
 
-  val rhino = new RhinoImpl
+  if (null == System.getSecurityManager)
+    log.warn("RUNNING WITHOUT SECURITYMANAGER. This is a BAD IDEA, as it will " +
+      "potentially open you up to malicious code messing with your system.")
 
-  val attachMap = new PropertiesConfiguration("attach.properties")
+  val home = System.getProperty("kobold.home")
+
+  private val rhino = new RhinoImpl
+
+  private val attachMap = new PropertiesConfiguration(home + "/attach.properties")
   attachMap.setReloadingStrategy(new FileChangedReloadingStrategy())
   attachMap.setAutoSave(true)
 

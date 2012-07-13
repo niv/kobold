@@ -78,7 +78,13 @@ class RhinoImpl extends Language[Function,RhinoContext,JSCtx] with Logging {
     rctx
   } finally JSCtx.exit()
 
-  def executeEventHandler(obj: IObject, eh: EventHandler[Function],
+  /*
+  def executeEventHandler(eh: EventHandler[Function])
+      (implicit ctx: RhinoContext) =
+    executeEventHandler(Module(), eh, List())
+  */
+
+  def executeEventHandler(obj: IObject, eh: Function,
       va: List[Object])(implicit ctx: RhinoContext) =
     inLanguage { jsctx =>
       val thisObj = jsctx.getWrapFactory().wrapAsJavaObject(jsctx, ctx.scope,
@@ -87,7 +93,7 @@ class RhinoImpl extends Language[Function,RhinoContext,JSCtx] with Logging {
       val va2 = va map { JSCtx.javaToJS(_, ctx.scope) } toArray
 
       Accounting.enforceQuota {
-        eh.getHandler.call(jsctx, ctx.scope, thisObj, va2)
+        eh.call(jsctx, ctx.scope, thisObj, va2)
       }
     }
 

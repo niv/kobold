@@ -36,7 +36,7 @@ trait Context[EH] extends IContext[EH]
       eventClass: String, va: List[Object]): Option[Any] =
     eventHandlerFor(eventClass) match {
       case Some(eh) =>
-        Some(language.executeEventHandler(obj, eh, va)(this))
+        Some(language.executeEventHandler(obj, eh.getHandler, va)(this))
       case None => None
     }
 

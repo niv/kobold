@@ -21,14 +21,17 @@ trait Context[EH] extends IContext[EH]
 
   def currentTimeMillis = System.currentTimeMillis
 
-  private var eventHandlers: Map[String, EventHandler[EH]] =
+  private var eventHandlers: Map[String, EH] =
     Map()
 
-  protected def eventHandlerFor(eventClass: String): Option[EventHandler[EH]] =
+  protected def eventHandlerFor(eventClass: String): Option[EH] =
     eventHandlers.get(eventClass)
 
-  protected def registerEvent(eventClass: String, ev: EventHandler[EH]) =
+  protected def registerEvent(eventClass: String, ev: EH) =
     eventHandlers += ((eventClass, ev))
+
+  def on(eventClass: String, fun: EH) =
+    this.registerEvent(eventClass, fun)
 
   /** Executes the given Event on this context. Returns whatever
     * the EH gave back, or None if no handler was ran. */
@@ -36,7 +39,7 @@ trait Context[EH] extends IContext[EH]
       eventClass: String, va: List[Any]): Option[Any] =
     eventHandlerFor(eventClass) match {
       case Some(eh) =>
-        Some(language.executeEventHandler(obj, eh.getHandler, va)(this))
+        Some(language.executeEventHandler(obj, eh, va)(this))
       case None => None
     }
 

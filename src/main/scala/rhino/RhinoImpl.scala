@@ -11,7 +11,6 @@ import org.mozilla.javascript.Scriptable
 
 import es.elv.kobold.api._
 import es.elv.kobold.host.Language
-import es.elv.kobold.host.EventHandler
 import es.elv.kobold.host.Accounting
 
 import com.codahale.logula.Logging
@@ -79,12 +78,6 @@ class RhinoImpl extends Language[Function,RhinoContext,JSCtx] with Logging {
     }
     rctx
   } finally JSCtx.exit()
-
-  /*
-  def executeEventHandler(eh: EventHandler[Function])
-      (implicit ctx: RhinoContext) =
-    executeEventHandler(Module(), eh, List())
-  */
 
   def executeEventHandler(obj: IObject, eh: Function,
       va: List[Any])(implicit ctx: RhinoContext) =

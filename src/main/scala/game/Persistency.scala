@@ -17,13 +17,13 @@ trait Persistency[H] extends Logging {
   protected def withStore[T](block: (IContextStore) => T): T =
     block(getStore)
 
-  def set(key: String, value: String) =
+  def set(key: String, value: Any) =
     withStore { _.set(key, value) }
 
-  def get(key: String): String =
+  def get(key: String): Any =
     withStore { _.get(key) }
 
-  def delete(key: String): String =
+  def delete(key: String): Any =
     withStore { _.delete(key) }
 
   def clear = withStore { _.clear }
@@ -34,7 +34,7 @@ trait ApacheCommonsPersistency[H] extends Persistency[H] {
 
   private lazy val config = {
     val configurationFile =
-      new java.io.File(uuid.toString + ".properties")
+      new java.io.File(uuid.toString + ".store")
     val c = if (configurationFile.exists)
       new PropertiesConfiguration(configurationFile)
     else
@@ -46,12 +46,12 @@ trait ApacheCommonsPersistency[H] extends Persistency[H] {
 
   protected class CommonsStore(cfg: PropertiesConfiguration)
       extends IContextStore {
-    def set(key: String, value: String) =
+    def set(key: String, value: Any) =
       spawn { cfg.setProperty(key, value) }
-    def get(key: String): String =
+    def get(key: String): Any =
       cfg.getString(key)
-    def delete(key: String): String = {
-      val i = cfg.getString(key)
+    def delete(key: String): Any = {
+      val i = get(key)
       spawn { cfg.clearProperty(key) }
       i
     }

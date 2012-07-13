@@ -3,7 +3,7 @@ package es.elv.kobold.host
 import es.elv.kobold.api._
 import java.io.InputStream
 
-trait Language[EH, CTX <: Context[EH]] {
+trait Language[EH, CTX <: Context[EH], ENV] {
   /** The visible name of this language. Must be unique inside a Host. */
   val name: String
 
@@ -17,4 +17,10 @@ trait Language[EH, CTX <: Context[EH]] {
   def executeEventHandler(obj: IObject,
       eventHandler: EventHandler[EH], va: List[Object])
       (implicit ctx: CTX): Any
+
+  /** Runs the given code block within the language environment.
+    * Will provide all the neccessary setup and teardown transparently
+    * and can be nested arbitarily.
+    */
+  def inLanguage[T](c: (ENV) => T)(implicit ctx: CTX): T
 }

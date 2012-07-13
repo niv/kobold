@@ -3,6 +3,7 @@ package es.elv.kobold.lang.rhino
 import org.mozilla.javascript.Function
 import org.mozilla.javascript.Script
 import org.mozilla.javascript.Scriptable
+import org.mozilla.javascript.{Context => JSCtx}
 
 import es.elv.kobold.host.Context
 import es.elv.kobold.host.Language
@@ -15,7 +16,7 @@ class RhinoContext(
 ) extends Context[Function] {
 
   override val language = rhino.
-    asInstanceOf[Language[Function,Context[Function]]]
+    asInstanceOf[Language[Function,Context[Function],JSCtx]]
 
   def on(eventClass: String, fun: Function) {
     val eht = new EventHandler[Function] {

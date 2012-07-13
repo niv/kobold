@@ -13,7 +13,7 @@ trait Context[EH] extends IContext[EH]
     with ApacheCommonsPersistency[EH]
     with ContextAccounting {
 
-  val language: Language[EH,Context[EH]]
+  val language: Language[EH,Context[EH],_]
 
   val uuid: UUID = UUID.randomUUID
 

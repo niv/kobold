@@ -1,10 +1,10 @@
 package es.elv.kobold.lang.rhino
 
 // overriding local versions with tweaks.
-import org.mozilla.javascript.{DefaultSecureWrapFactory,
-  SecureClassShutter, SecureScriptRuntime}
+import org.mozilla.javascript.{SecureClassShutter,
+  SecureScriptRuntime, DefaultSecureWrapFactory, WrapFactory}
 
-import org.mozilla.javascript.{Context => JSCtx, ContextFactory}
+import org.mozilla.javascript.{Context => JSCtx, ContextFactory, ContextAction}
 import org.mozilla.javascript.Function
 import org.mozilla.javascript.Script
 import org.mozilla.javascript.Scriptable
@@ -16,10 +16,10 @@ import es.elv.kobold.host.Accounting
 
 import com.codahale.logula.Logging
 
-class RhinoImpl extends Language[Function,RhinoContext] with Logging {
+class RhinoImpl extends Language[Function,RhinoContext,JSCtx] with Logging {
   val name = "js/rhino"
 
-  private val wrapFactory: DefaultSecureWrapFactory =
+ private val wrapFactory: DefaultSecureWrapFactory =
     new DefaultSecureWrapFactory()
   wrapFactory.addAllowedNatives(
       // Script Context and Helpers
@@ -41,19 +41,25 @@ class RhinoImpl extends Language[Function,RhinoContext] with Logging {
   classShutter.addAllowedStartsWith("es.elv.kobold.game.")
   classShutter.addAllowedStartsWith("es.elv.kobold.lang.rhino.")
 
-  private def withContext[T](c: (JSCtx) => T)
-      (implicit ctx: RhinoContext): T = try {
+   private val contextFactory: ContextFactory = new ContextFactory {
+    override def makeContext: JSCtx = {
+      val c = super.makeContext
+      c.setWrapFactory(wrapFactory)
+      c.setClassShutter(classShutter)
+      c
+    }
+  }
 
-    val jsctx = ContextFactory.getGlobal.enterContext
+  def inLanguage[T](c: (JSCtx) => T)
+      (implicit ctx: RhinoContext): T = {
 
-    jsctx.setWrapFactory(wrapFactory)
-    jsctx.setClassShutter(classShutter)
-
-    ctx.scope.put("ctx", ctx.scope, ctx)
-
-    c(jsctx)
-
-  } finally JSCtx.exit
+    contextFactory.call(new ContextAction {
+      def run(jsctx: JSCtx): Object = {
+        ctx.scope.put("ctx", ctx.scope, ctx)
+        c(jsctx).asInstanceOf[Object]
+      }
+    }).asInstanceOf[T]
+  }
 
   def prepare(source: java.io.InputStream): RhinoContext = try {
     val ctx = JSCtx.enter
@@ -66,7 +72,7 @@ class RhinoImpl extends Language[Function,RhinoContext] with Logging {
     implicit val rctx = new RhinoContext(this, scope, s)
 
     println(ctx.getLanguageVersion)
-    withContext { jsctx =>
+    inLanguage { jsctx =>
       s.exec(jsctx, scope)
     }
     rctx
@@ -74,7 +80,7 @@ class RhinoImpl extends Language[Function,RhinoContext] with Logging {
 
   def executeEventHandler(obj: IObject, eh: EventHandler[Function],
       va: List[Object])(implicit ctx: RhinoContext) =
-    withContext { jsctx =>
+    inLanguage { jsctx =>
       val thisObj = jsctx.getWrapFactory().wrapAsJavaObject(jsctx, ctx.scope,
           obj, obj.getClass)
 

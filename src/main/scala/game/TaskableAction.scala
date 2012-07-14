@@ -1,9 +1,10 @@
 package es.elv.kobold.game
 
+import es.elv.kobold.N
 import es.elv.kobold.api._
 import es.elv.kobold.host._
 
-import org.nwnx.nwnx2.jvm.{NWScript,NWObject,Scheduler}
+import org.nwnx.nwnx2.jvm.{NWObject,Scheduler}
 
 import com.codahale.logula.Logging
 
@@ -12,11 +13,11 @@ abstract class TaskableAction(
 ) extends BaseTask with Logging {
 
   override final def tick {
-      if (!NWScript.getIsObjectValid(host)) {
+      if (!N.getIsObjectValid(host)) {
         log.debug("host invalid, stopping ticking")
         cancel
       } else {
-        val cur = NWScript.getCurrentAction(host)
+        val cur = N.getCurrentAction(host)
         log.debug("tick: " + cur)
         if (cur != taskAction && isActionPossible) {
           log.debug("current action != taskAction, resetting")
@@ -32,7 +33,7 @@ abstract class TaskableAction(
 
   // You can override this if neccessary.
   protected def stopDoingAction {
-    NWScript.clearAllActions(false)
+    N.clearAllActions(false)
     log.debug("stopAction")
   }
 
@@ -51,14 +52,14 @@ class FollowTask(
 
   log.debug(host + " following " + toFollow)
 
-  def isActionPossible = !NWScript.getIsInCombat(host)
+  def isActionPossible = !N.getIsInCombat(host)
 
   def doAction {
     log.debug("doAction")
     Scheduler.assign(toFollow, new Runnable {
       def run {
-        NWScript.clearAllActions(false)
-        NWScript.actionForceFollowObject(toFollow, followDistance)
+        N.clearAllActions(false)
+        N.actionForceFollowObject(toFollow, followDistance)
       }
     })
   }

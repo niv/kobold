@@ -18,9 +18,27 @@ private [host] trait ContextAccounting extends IContextAccounting {
 
   def quota = _quota
   private [host] var _quota: Long = maxQuota
+
+  // Time spent in <category> -> (count, ns)
+  type AccountingData = (Long, Long)
+  private [host] val timeSpentIn = new
+      collection.mutable.HashMap[String, AccountingData]()
+      with collection.mutable.SynchronizedMap[String, AccountingData] {
+    override def default(k: String) = (0L, 0L)
+  }
 }
 
 object Accounting extends Logging {
+
+  def trackTime[CTX<:Context[_],T](what: String)(p: => T)
+      (implicit ctx: CTX): T = {
+
+    val start = System.nanoTime
+    try p finally {
+      val (count, ns) = ctx.timeSpentIn(what)
+      ctx.timeSpentIn(what) = (count + 1, ns + (System.nanoTime - start))
+    }
+  }
 
   def enforceQuota[EH,ENV,CTX<:Context[EH],T](p: => T)
       (implicit ctx: CTX, lang: Language[EH,CTX,ENV]): T =

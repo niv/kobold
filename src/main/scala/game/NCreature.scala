@@ -1,30 +1,30 @@
 package es.elv.kobold.game
 
-import org.nwnx.nwnx2.jvm.{Scheduler, NWObject, NWScript}
+import org.nwnx.nwnx2.jvm.{Scheduler, NWObject}
 import es.elv.kobold.api._
-import es.elv.kobold.G
+import es.elv.kobold.{G, N}
 
 import es.elv.kobold.Implicits._
 
 class NCreature(w: NWObject) extends NObject(w) with ICreature {
-  lazy val isPlayer = NWScript.getIsPC(this)
+  lazy val isPlayer = N.getIsPC(this)
 
   def say(m: String) = <= {
-    NWScript.speakString(m, 0)
+    N.speakString(m, 0)
   }
 
   def whisper(message: String) = <= {
-    NWScript.speakString(message, 1)
+    N.speakString(message, 1)
   }
 
   def sees(other: ICreature): Boolean =
-    NWScript.getObjectSeen(other, this)
+    N.getObjectSeen(other, this)
 
   private def nearObjects[T <: NObject](typeMask: Int, distance: Float): List[T] =
-    NWScript.getObjectsInShape(
+    N.getObjectsInShape(
       4 /* SHAPE_SPHERE */,
       distance,
-      NWScript.getLocation(this),
+      N.getLocation(this),
       true /* LOS */,
       typeMask,
       IVector3.ORIGIN).
@@ -35,7 +35,7 @@ class NCreature(w: NWObject) extends NObject(w) with ICreature {
     nearObjects[NCreature](1 /*OBJECT_TYPE_CREATURE*/, distance).
       filter(sees(_))
 
-  def location = NWScript.getLocation(this)
+  def location = N.getLocation(this)
 
   lazy val taskManager: TaskManager = new TaskManager(this)
 

@@ -125,11 +125,13 @@ object Host extends Host with Logging {
     log.debug(eventClass + " -> "  + objSelf + ": " + va)
 
     def inner(ctx: Context[_]): Boolean = try {
-      ctx.executeEventHandler(objSelf,
-        eventClass, convertToAPI(va)) match {
-          case Some(_) => true
-          case None => false
-        }
+      Accounting.trackTime(eventClass) {
+        ctx.executeEventHandler(objSelf,
+          eventClass, convertToAPI(va)) match {
+            case Some(_) => true
+            case None => false
+          }
+      } (ctx)
     } catch {
       case any =>
         throw any

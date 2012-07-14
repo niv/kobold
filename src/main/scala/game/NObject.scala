@@ -1,9 +1,9 @@
 package es.elv.kobold.game
 
-import org.nwnx.nwnx2.jvm.{NWObject, NWScript, Scheduler}
+import org.nwnx.nwnx2.jvm.{NWObject, Scheduler}
 import es.elv.kobold.api.{IBase, IObject, ActionQueue}
 import es.elv.kobold.host.Host
-import es.elv.kobold.G
+import es.elv.kobold.{G, N}
 
 class NoAccessException extends RuntimeException
 
@@ -31,11 +31,11 @@ class NObject(wrapped: NWObject) extends G(wrapped) with IObject
 
   def name = {
     checkAccess
-    NWScript.getName(this, false)
+    N.getName(this, false)
   }
 
   def destroy {
     checkAccess
-    NWScript.destroyObject(this, 1f)
+    N.destroyObject(this, 1f)
   }
 }

@@ -1,3 +1,3 @@
 package es.elv.kobold.api
 
-trait IModule extends IBase
+trait IModule extends IObject

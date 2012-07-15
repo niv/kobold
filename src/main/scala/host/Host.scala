@@ -42,7 +42,7 @@ trait Host extends HostEvents {
   def attachedContexts(o: IObject): Set[Context[_]]
 
   /** Returns the current objectSelf, or None if no script is running. */
-  def currentObjectSelf: Option[IBase]
+  def currentObjectSelf: Option[IObject]
 
   /** Returns the current context, or None if no script is running. */
   def currentContext: Option[Context[_]]
@@ -91,7 +91,7 @@ object Host extends Host with Logging {
   private def convertToAPI(va: List[Any]): List[Any] = {
     va map { e =>
       e match {
-        case b: IBase => b
+        case b: IObject => b
         case o: NWObject => throw new Exception("nooooooo")
         case l: NWLocation =>
           ILocation(G(l.getArea), IVector3(l.getX, l.getY, l.getZ), l.getFacing)
@@ -102,7 +102,7 @@ object Host extends Host with Logging {
     }
   }
 
-  private var _currentObjectSelf: Option[IBase] = None
+  private var _currentObjectSelf: Option[IObject] = None
   private var _currentContext: Option[Context[_]] = None
   def currentObjectSelf = _currentObjectSelf
   def currentContext = _currentContext

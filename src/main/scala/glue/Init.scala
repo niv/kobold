@@ -79,8 +79,7 @@ private [glue] object Init extends Logging {
     Scheduler addSchedulerListener EventHandler
 
     // The default object handler just passes all requests on to
-    // G[T](), which will spit out NWhatevers, all implemenations of
-    // IBase -> IObject -> IWhatever
+    // G[T](), which will spit out NWhatevers
     NWObject registerObjectHandler new NWObject.ObjectHandler {
       def handleObjectClass(obj: NWObject, valid: Boolean, objType: Int,
             resRef: String, tag: String): NWObject =

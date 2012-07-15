@@ -17,4 +17,10 @@ trait IContext[HANDLER] extends IConcurrency[HANDLER]
     * Works just like System.currentTimeMillis() in Java.
     */
   def currentTimeMillis: Long
+
+
+  /** Returns a list of all objects currently attached to
+    * this context.
+    */
+  def attached: Set[IObject]
 }

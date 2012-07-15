@@ -16,6 +16,10 @@ class ScalaSecureWrapFactory extends DefaultSecureWrapFactory {
 		    super.wrap(cx, scope, ll.asInstanceOf[List[Any]].toArray,
           classOf[Array[_]])
 
+      case ll: Set[_] =>
+		    super.wrap(cx, scope, ll.asInstanceOf[Set[Any]].toArray,
+          classOf[Array[_]])
+
       case tu: Product =>
 		    super.wrap(cx, scope, tu.asInstanceOf[Product].productIterator.toArray,
           classOf[Array[_]])

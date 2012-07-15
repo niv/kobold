@@ -54,6 +54,8 @@ trait Context[EH] extends IContext[EH]
   def log(message: String) {
     _log.info(message)
   }
+
+  def attached = Host.attachedObjects(this)
 }
 
 object Context {

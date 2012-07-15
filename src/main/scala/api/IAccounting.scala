@@ -16,7 +16,7 @@ trait IContextAccounting {
   val msPerSecond = 10
 
   /** The maximum quota of this context, in microseconds. */
-  val maxQuota = 150 * 1000
+  val maxQuota = 5 * 1000 * 1000
 
   /** The maximum execution time for a single EventHandler (in us). */
   val limitSingle = 50 * 1000

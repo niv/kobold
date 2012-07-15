@@ -15,11 +15,8 @@ class NObject(wrapped: NWObject) extends G(wrapped) with IObject
   protected implicit def i2n(o: IObject): NWObject =
     new NWObject(o.objectId)
 
-  def message(target: IObject, message: Object) = target match {
-    case vv: IObject with ActionQueue =>
-      Host.message(this, message)(vv)
-    case _ =>
-  }
+  def message(message: Object) =
+    Host.message(Host.currentObjectSelf.get, this, message)
 
   def mayAccess = Host.currentObjectSelf match {
     case Some(o) => o.objectId == this.objectId

@@ -49,8 +49,8 @@ trait Host extends HostEvents {
 
   /** Sends a inter-object message.
     */
-  def message(source: IObject, message: Object)
-    (implicit target: IObject with ActionQueue)
+  def message(source: IObject, target: IObject with ActionQueue,
+      message: Object)
 }
 
 object Host extends Host with Logging {
@@ -153,9 +153,8 @@ object Host extends Host with Logging {
 
   }
 
-  def message(source: IObject, message: Object)
-      (implicit target: IObject with ActionQueue) =
-    target <= handleObjectEvent("message", List(source, message))
+  def message(source: IObject, target: IObject with ActionQueue, message: Object) =
+    target <= handleObjectEvent("message", List(source, message))(source)
 
   override def onCreatureHB(c: ICreature) =
     if (attachedTo(c).size > 0) c match {

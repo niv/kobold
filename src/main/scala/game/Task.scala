@@ -4,9 +4,9 @@ import es.elv.kobold.api._
 import es.elv.kobold.host.Host
 
 trait TaskEvents {
-  def onTaskStarted(obj: ICreature with ActionQueue, task: ITask)
-  def onTaskCompleted(obj: ICreature with ActionQueue, task: ITask)
-  def onTaskCancelled(obj: ICreature with ActionQueue, task: ITask)
+  def onTaskStarted(obj: ICreature with IActionable, task: ITask)
+  def onTaskCompleted(obj: ICreature with IActionable, task: ITask)
+  def onTaskCancelled(obj: ICreature with IActionable, task: ITask)
 }
 
 trait BaseTask extends ITask {
@@ -30,7 +30,7 @@ trait BaseTask extends ITask {
 
 class TaskDeadException extends RuntimeException
 
-class TaskManager(private val parent: ICreature with ActionQueue) {
+class TaskManager(private val parent: ICreature with IActionable) {
   private val q = scala.collection.mutable.Queue[BaseTask]()
   private var current: Option[BaseTask] = None
 

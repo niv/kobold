@@ -49,8 +49,7 @@ trait Host extends HostEvents {
 
   /** Sends a inter-object message.
     */
-  def message(source: IObject, target: IObject with ActionQueue,
-      message: Object)
+  def message(source: IObject, target: IActionable, message: Object)
 }
 
 object Host extends Host with Logging {
@@ -153,7 +152,7 @@ object Host extends Host with Logging {
 
   }
 
-  def message(source: IObject, target: IObject with ActionQueue, message: Object) =
+  def message(source: IObject, target: IActionable, message: Object) =
     target <= handleObjectEvent("message", List(source, message))(source)
 
   override def onCreatureHB(c: ICreature) =
@@ -162,10 +161,10 @@ object Host extends Host with Logging {
       case _ =>
     }
 
-  def onTaskStarted(obj: ICreature with ActionQueue, task: ITask) =
+  def onTaskStarted(obj: ICreature with IActionable, task: ITask) =
     obj <= handleObjectEvent("task.started", List(task))(obj)
-  def onTaskCompleted(obj: ICreature with ActionQueue, task: ITask) =
+  def onTaskCompleted(obj: ICreature with IActionable, task: ITask) =
     obj <= handleObjectEvent("task.completed", List(task))(obj)
-  def onTaskCancelled(obj: ICreature with ActionQueue, task: ITask) =
+  def onTaskCancelled(obj: ICreature with IActionable, task: ITask) =
     obj <= handleObjectEvent("task.cancelled", List(task))(obj)
 }

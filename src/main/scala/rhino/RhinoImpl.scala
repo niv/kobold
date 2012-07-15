@@ -28,6 +28,7 @@ class RhinoImpl extends Language[Function,RhinoContext,JSCtx] with Logging {
 
       // Game object interfaces
       classOf[IObject], classOf[IUnknown],
+      classOf[IActionable],
       classOf[ICreature],
       classOf[IArea], //Item.class, IModule.class, IPlaceable.class,
       classOf[ILocation], classOf[IVector2], classOf[IVector3],

@@ -33,19 +33,4 @@ trait IObject {
    * and may be delayed by the server as required.
    */
   def message(message: Object)
-
-  /** Destroy this object, unmap it from the Script Host, and
-    * remove all running script handlers. This is non-reversible.
-    */
-  def destroy
-
-  /** Gets the name of this Object. */
-  def name: String
-
-  /**
-   * Will return the distance to other, in fraction of meters.
-   * Will return for zero if the given object is not in perception
-   * range.
-   */
-  //float distanceTo(IObject other);
 }

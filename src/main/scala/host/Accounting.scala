@@ -8,7 +8,8 @@ import es.elv.kobold._
 import scala.actors.Futures._
 import scala.actors.Future
 
-class QuotaExceededException extends RuntimeException
+class QuotaExceededException(message: String = null)
+  extends RuntimeException(message)
 
 private [host] trait ContextAccounting extends IContextAccounting {
   private [host] var _lastActiveAt: Long = System.nanoTime
@@ -57,7 +58,7 @@ object Accounting extends Logging {
 
     // No point in hitting the VM if there isn't any quota to run in.
     if (ctx.quotaEnabled && enforce && ctx.quota <= 1000)
-      throw new QuotaExceededException
+      throw new QuotaExceededException("Not enough quota to enter VM")
 
     val start = System.nanoTime
     try {
@@ -67,7 +68,7 @@ object Accounting extends Logging {
 
         awaitAll(1 + ctx.quota / 1000, fu).
           head.asInstanceOf[Option[T]].
-          getOrElse(throw new QuotaExceededException)
+          getOrElse(throw new QuotaExceededException("Timeout waiting on return"))
 
       } else
         p

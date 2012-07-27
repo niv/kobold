@@ -19,7 +19,9 @@ class NObject(wrapped: NWObject) extends G(wrapped) with IObject
     Host.message(Host.currentObjectSelf.get, this, message)
 
   def mayAccess = Host.currentObjectSelf match {
-    case Some(o) => o.objectId == this.objectId
+    case Some(o) =>
+      o.objectId == this.objectId ||
+      Host.currentContext.get.attached.contains(this)
     case None => false
   }
 
